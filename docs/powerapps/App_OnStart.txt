@@ -1,0 +1,338 @@
+﻿/* ========== COLORES ========== */
+Set( gNavy;      ColorValue("#0B3B82") );;
+Set( gNavyDark;  ColorValue("#072A5C") );;
+Set( gNavySoft;  ColorValue("#C3D5EC") );;
+Set( gRojo;      ColorValue("#E30613") );;
+Set( gRojoDark;  ColorValue("#B6050F") );;
+Set( gVerde;     ColorValue("#1E8E5A") );;
+Set( gAmbar;     ColorValue("#C9820A") );;
+Set( gCritico;   ColorValue("#C81E2C") );;
+Set( gAzul;      ColorValue("#2F6FB0") );;
+Set( gAzulBg;    ColorValue("#E6F0F9") );;
+Set( gNaranja;   ColorValue("#BF6E00") );;
+Set( gGris;      ColorValue("#6B7280") );;
+Set( gFondo;     ColorValue("#F4F6F8") );;
+Set( gLinea;     ColorValue("#E2E7EC") );;
+Set( gChip;      ColorValue("#EDF1F5") );;
+Set( gTexto;     ColorValue("#252A31") );;
+Set( gTextoSec;  ColorValue("#5A6572") );;
+
+
+/* ========== USUARIO Y ROL (unica llamada a SharePoint) ========== */
+Set( gUsuario; User().FullName );;
+Set( gIniciales;
+    Concat( FirstN( Split( gUsuario; " " ); 2 ); Left( Value; 1 ) ) );;
+Set( gUsuarioEmail; Lower( User().Email ) );;
+
+Set( gVendedor;
+    LookUp( dim_VENDEDORES; Lower( VENDEDOR_EMAIL ) = gUsuarioEmail ) );;
+Set( gVendedorOk; Not( IsBlank( gVendedor ) ) );;
+
+/* --- IDENTIDAD FIJA: quien esta usando la app. Nunca cambia. --- */
+Set( gUsrCod; gVendedor.VENDEDOR_CODIGO );;
+Set( gUsrNom; gVendedor.VENDEDOR_NOMBRE );;
+
+/* --- IDENTIDAD ATRIBUIDA: a quien se le carga la venta.
+       Arranca igual; un supervisor la cambia en la pantalla de Visita. --- */
+Set( gVendSel; gVendedor );;
+Set( gVendCod; gUsrCod );;
+Set( gVendNom; gUsrNom );;
+
+Set( gRol;         Lower( Text( gVendedor.VENDEDOR_ROL.Value ) ) );;
+Set( gEsAdmin;     gRol = "admin" );;
+Set( gEsAlmacen;   gRol = "almacen" );;
+Set( gEsCobranzas; gRol = "cobranzas" );;
+Set( gEsCobrador;  gRol = "cobrador" );;
+Set( gEsVendedor;
+    Not( gEsAdmin ) And Not( gEsAlmacen ) And Not( gEsCobranzas ) And Not( gEsCobrador ) );;
+
+
+/* ========== CAPACIDADES (los controles usan estas, nunca el rol) ========== */
+/* Supervisor que carga visitas, pedidos y cobranzas a nombre de otro.
+   NO incluye admin a proposito: el admin no necesita el combo
+   "Cargar a nombre de" y solo le estorba la pantalla de Visita. */
+Set( gPuedeElegirVendedor; gVendedor.VENDEDOR_CARGA_POR_OTROS = true );;
+
+Set( gVeTabPedidos;        gEsAdmin Or gEsAlmacen Or gEsVendedor );;
+Set( gVeTabCobranzas;      gEsAdmin Or gEsCobranzas );;
+Set( gVeTodosLosPedidos;   gEsAdmin Or gEsAlmacen Or gEsCobranzas Or gPuedeElegirVendedor );;
+Set( gVeTodasLasCobranzas; gEsAdmin Or gEsCobranzas );;
+Set( gVeTodasLasNotas;     gEsAdmin Or gEsCobrador Or gPuedeElegirVendedor );;
+Set( gVeOtrasPantallas;    gEsAdmin Or gEsVendedor );;
+
+/* Vendedor que ademas numera proformas, despacha y anula,
+   pero SOLO sobre sus propios pedidos. Se marca con la columna
+   VENDEDOR_DESPACHA (Si/No) en dim_VENDEDORES. */
+Set( gVendedorDespacha; gVendedor.VENDEDOR_DESPACHA = true );;
+
+Set( gPuedeProformar;      gEsAdmin Or gEsAlmacen Or gVendedorDespacha );;
+Set( gPuedeDespachar;      gEsAdmin Or gEsAlmacen Or gVendedorDespacha );;
+Set( gPuedeEditarPedido;   gEsAdmin Or gEsAlmacen Or gEsVendedor );;
+Set( gPuedeConfirmar;      gEsAdmin Or gEsCobranzas );;
+
+/* Por ticket: se recalculan al seleccionar un pedido en PantallaDetalles */
+Set( gTicketEsMio;        false );;
+Set( gProformarTicket;    false );;
+Set( gDespacharTicket;    false );;
+Set( gTicketCargadoPorMi; false );;
+Set( gEditarTicket;       false );;
+
+/* Codigos de los vendedores que despachan sus propios pedidos.
+   Se usa para decidir a quien NO se le manda el correo. */
+ClearCollect( colVendDespachan;
+    ForAll( Filter( dim_VENDEDORES; VENDEDOR_DESPACHA = true ) As v;
+        { COD: v.VENDEDOR_CODIGO } ) );;
+
+/* Vendedores a los que un supervisor le puede cargar una venta.
+   Se resuelve aca y no en el combo: son 13 filas, una lectura, y
+   el combo queda sin advertencias de delegacion. */
+ClearCollect( colVendedoresCarga;
+    SortByColumns(
+        Filter( dim_VENDEDORES;
+            Lower( Text( VENDEDOR_ROL.Value ) ) = "user";
+            Not( Coalesce( VENDEDOR_CARGA_POR_OTROS; false ) ) );
+        "VENDEDOR_NOMBRE" ) );;
+
+
+/* ========== VENTANA DE DATOS ========== */
+Set( gDesde; DateAdd( Today(); -90; TimeUnit.Days ) );;
+
+
+/* ========== PEDIDO EN CURSO ========== */
+Set( gPedidoResumen; { Lineas: 0; Total: 0 } );;
+
+
+/* ========== DESPACHO: LINEAS DE LA PROFORMA ========== */
+ClearCollect( colProfLineas;
+    {
+        ID: 0;
+        PRODUCTO_TERMINADO_CODIGO: "";
+        PRODUCTO_DESCRIPCION: "";
+        PRODUCTO_UNIDAD: "";
+        PRODUCTO_PESO_PROMEDIO: 0;
+        LINEA_ALMACEN: "";
+        PROFORMA_CLAVE: "";
+        LINEA_CANTIDAD: 0;
+        LINEA_PRECIO_UNITARIO: 0;
+        Despachado: 0;
+        Pendiente: 0;
+        ADespachar: 0
+    }
+);;
+Clear( colProfLineas );;
+
+ClearCollect( colNotaEnvio;
+    {
+        ID: 0;
+        PRODUCTO_TERMINADO_CODIGO: "";
+        PRODUCTO_DESCRIPCION: "";
+        PRODUCTO_UNIDAD: "";
+        PRODUCTO_PESO_PROMEDIO: 0;
+        LINEA_ALMACEN: "";
+        PROFORMA_CLAVE: "";
+        LINEA_CANTIDAD: 0;
+        LINEA_PRECIO_UNITARIO: 0;
+        Despachado: 0;
+        Pendiente: 0;
+        ADespachar: 0
+    }
+);;
+Clear( colNotaEnvio );;
+
+
+/* ========== LINEAS DE NOTA (mismo esquema para todas) ========== */
+ClearCollect( colNotaCheck;
+    {
+        ID: 0;
+        NOTA_NUMERO: "";
+        PROFORMA_CLAVE: "";
+        PRODUCTO_TERMINADO_CODIGO: "";
+        PRODUCTO_DESCRIPCION: "";
+        PRODUCTO_UNIDAD: "";
+        PRODUCTO_PESO_PROMEDIO: 0;
+        LINEA_ALMACEN: "";
+        LINEA_CANTIDAD: 0;
+        LINEA_PRECIO_UNITARIO: 0
+    }
+);;
+Clear( colNotaCheck );;
+
+ClearCollect( colNotaBorrar;       colNotaCheck );;
+ClearCollect( colNvLineas;         colNotaCheck );;
+ClearCollect( colNvCheck;          colNotaCheck );;
+ClearCollect( colCbrNotaLineas;    colNotaCheck );;
+ClearCollect( colTicketNotaLineas; colNotaCheck );;
+ClearCollect( colLineasActivas;    colNotaCheck );;
+
+
+/* ========== CORREO DE MODIFICACION POR PROFORMA ========== */
+ClearCollect( colMailProf;    { Value: "x" } );; Clear( colMailProf );;
+ClearCollect( colMailProfOrd; { Value: "x" } );; Clear( colMailProfOrd );;
+ClearCollect( colMailEnvios;
+    {
+        Clave: ""; Alm: ""; Nro: "";
+        TotAhora: 0; TotAntes: 0; Kg: 0;
+        NNuevos: 0; NModif: 0; NElim: 0
+    }
+);;
+Clear( colMailEnvios );;
+
+
+/* ========== COMPETENCIA ========== */
+ClearCollect( colCompHoy;
+    {
+        ID: 0;
+        COMPETIDOR: "";
+        COMP_DESCRIPCION: "";
+        COMP_MEDIDA: "";
+        COMP_UNIDAD: "";
+        COMP_PRECIO: 0;
+        COMP_CANTIDAD: 0
+    }
+);;
+Clear( colCompHoy );;
+Set( gCompTipo;      "" );;
+Set( gCompCliente;   Blank() );;
+Set( gResetComp;     false );;
+Set( gResetCompCli;  false );;
+ClearCollect( colCompSugeridos; { Value: "" } );; Clear( colCompSugeridos );;
+
+
+/* ========== NOTAS DEL PEDIDO ========== */
+ClearCollect( colTicketNotas;
+    {
+        ID: 0;
+        NOTA_NUMERO: "";
+        PROFORMA_CLAVE: "";
+        PROFORMA_NUMERO: "";
+        PEDIDO_NUMERO: "";
+        CLIENTE_CODIGO: "";
+        CLIENTE_NOMBRE: "";
+        VENDEDOR_CODIGO: "";
+        VENDEDOR_NOMBRE: "";
+        NOTA_ALMACEN: "";
+        NOTA_FECHA: Now();
+        NOTA_TOTAL: 0;
+        NOTA_TOTAL_PAGADO: 0;
+        NOTA_SALDO_PENDIENTE: 0;
+        NOTA_ANULADA: false;
+        NOTA_ANULADA_MOTIVO: "";
+        NOTA_ANULADA_POR: "";
+        NOTA_ANULADA_FECHA: Now()
+    }
+);;
+Clear( colTicketNotas );;
+
+
+/* ========== CREACION DE NOTA ========== */
+Set( gNotaNro;   "" );;
+Set( gNotaTot;   0 );;
+Set( gNotaCant;  0 );;
+Set( gNotaNueva; Blank() );;
+
+
+/* ========== BORRADO / ANULACION DE NOTA ========== */
+Set( gNvNro;      "" );;
+Set( gNvClave;    "" );;
+Set( gNvId;       0 );;
+Set( gNvCant;     0 );;
+Set( gNvAnularId; 0 );;
+Set( gAnulOk;     false );;
+
+
+/* ========== COBRANZA ========== */
+Set( gNotaCbr;       Blank() );;
+Set( gHuboPago;      false );;
+Set( gTipoPago;      "" );;
+Set( gFormaPago;     "" );;
+Set( gCobranzaMonto; 0 );;
+Set( gConfOk;        false );;
+Set( gPagadoNuevo;   0 );;
+Set( gSaldoNuevo;    0 );;
+Set( gCbrBorrarId;   0 );;
+Set( gPendAprob;     false );;
+Set( gSaldoDisp;     0 );;
+Set( gCbrEditNro;    false );;
+Set( gCbrNroOk;      false );;
+Set( gCobLive;       Blank() );;
+Set( gSaldoOk;       false );;
+Set( gCbrOk;         false );;
+Set( gCbrNuevaId;    0 );;
+
+ClearCollect( colCobrPend; { NOTA_NUMERO: ""; COBRANZA_MONTO: 0 } );;
+Clear( colCobrPend );;
+
+
+/* ========== EDICION DE PEDIDO: COMPARACION ========== */
+Set( gEdVenceAntes; Now() );;
+Set( gEdVenceAhora; Now() );;
+Set( gEdProdAntes;  0 );;
+Set( gEdProdAhora;  0 );;
+Set( gEdTotalAntes; 0 );;
+
+
+/* ========== GUARDADO DE PEDIDO ==========
+   El guardado es transaccional: cabecera, lineas y proformas.
+   Si falla cualquiera de las tres, se borra todo y no queda
+   un pedido a medias. gCantAlmacenes es cuantas proformas
+   TIENEN que quedar creadas. */
+Set( gLinPedOk;      false );;
+Set( gProfOk;        false );;
+Set( gCantAlmacenes; 0 );;
+
+ClearCollect( colPedLineasOk;     FirstN( fact_PEDIDO_LINEAS; 0 ) );;
+ClearCollect( colPedLimpieza;     FirstN( fact_PEDIDO_LINEAS; 0 ) );;
+ClearCollect( colUltimoPed;       FirstN( fact_PEDIDO_LINEAS; 0 ) );;
+ClearCollect( colPedProfOk;       FirstN( fact_PROFORMAS; 0 ) );;
+ClearCollect( colPedProfLimpieza; FirstN( fact_PROFORMAS; 0 ) );;
+
+
+/* ========== PANTALLA DETALLES ========== */
+Set( gTabDetalles; If( gEsCobranzas; "Cobranzas"; "Pedidos" ) );;
+
+
+/* ============================================================
+   ==================== CORREOS ===============================
+   Unico lugar donde se editan las direcciones de la app.
+   ============================================================ */
+
+/* --- Variables de trabajo (se llenan solas, no tocar) --- */
+Set( gMailVend;        "" );;
+Set( gMailAlmacen;     "" );;
+Set( gMailCobroCuerpo; "" );;
+Set( gMailModDest;     "" );;
+Set( gMailModCuerpo;   "" );;
+Set( gMailModFilas;    "" );;
+Set( gMailModElim;     "" );;
+Set( gMailPedidoDest;  "" );;
+Set( gMailCbrDest;     "" );;
+Set( gMailCbrCuerpo;   "" );;
+Set( gMailAlmPedido;   "" );;
+Set( gMailAlmTicket;   "" );;
+
+/* --- Casilla del ROL ALMACEN ---
+   Recibe: pedido nuevo, proforma modificada y nota anulada. */
+Set( gMailRolAlmacen; "agonzales@plasticoscarmen.com" );;
+
+/* --- Casilla del ROL COBRANZAS ---
+   Recibe: aviso de cobranza registrada, para que entre a confirmarla. */
+Set( gMailRolCobranzas; "caja@plasticoscarmen.com" );;
+
+/* --- Destinatarios FIJOS del aviso de NOTA DE VENTA ANULADA ---
+   Siempre reciben, sin importar el almacen. */
+Set( gMailAnulacionFijos;
+    "acuellar@plasticoscarmen.com;fquenta@plasticoscarmen.com;jmontenegro@plasticoscarmen.com;almacenbolsa@plasticoscarmen.com" );;
+
+/* --- Encargados de los 5 almacenes ---
+   Solo reciben el aviso de NOTA DE VENTA ANULADA, los cinco juntos. */
+ClearCollect( colMailEncargados;
+    { MAIL: "mrendon@plasticoscarmen.com;dpaz@plasticoscarmen.com" };            /* P11 - EXTRUSION    */
+    { MAIL: "njustiniano@plasticoscarmen.com;ggutierrez@plasticoscarmen.com" };  /* P12 - TERMOFORMADO */
+    { MAIL: "njustiniano@plasticoscarmen.com;tjustiniano@plasticoscarmen.com" }; /* P13 - EXPANDIDO    */
+    { MAIL: "tjustiniano@plasticoscarmen.com" };                                 /* P14 - INYECCION    */
+    { MAIL: "faguilar@plasticoscarmen.com;ecardenas@plasticoscarmen.com" }       /* P15 - RAFIA        */
+);;
+
+
+/* ========== CONFIRMACION DE "NUEVA VISITA" ========== */
+Set( gConfNuevaVisita; false )

@@ -1,0 +1,744 @@
+﻿Screens:
+  PantallaCompetencia_1:
+    Properties:
+      Fill: =gFondo
+      Height: =App.Height
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =Set( gCompTipo, Blank() );
+        Set( gCompCliente, Blank() );
+
+        Set( gResetComp, true );    Set( gResetComp, false );
+        Set( gResetCompCli, true ); Set( gResetCompCli, false );
+
+        ClearCollect( colCompHoy,
+            Filter( fact_COMPETENCIA,
+                VENDEDOR_CODIGO = gVendCod,
+                RELEVAMIENTO_FECHA >= Today()
+            )
+        );
+        ClearCollect( colCompSugeridos,
+            FirstN( Sort( Distinct( fact_COMPETENCIA, COMPETIDOR ), Value ), 5 ) )
+      Width: =App.Width
+    Children:
+      - Container3:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =Parent.Width
+          Children:
+            - cmpEncabezado_8:
+                Control: CanvasComponent
+                ComponentName: cmpEncabezado
+                Properties:
+                  Fill: =gNavy
+                  Height: =56
+                  Width: =Parent.Width
+            - ctnCompDetalles:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Height: =656
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: |
+                    =12
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =14
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =14
+                  RadiusBottomLeft: =16
+                  RadiusBottomRight: =16
+                  Width: =Parent.Width
+                  Y: =56
+                Children:
+                  - lblCompTitulo:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =gTexto
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: ="RELEVAMIENTO DE COMPETENCIA"
+                  - cardCompDonde:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =gLinea
+                        BorderThickness: =1
+                        Fill: =Color.White
+                        FillPortions: =0
+                        Height: =176
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        RadiusBottomLeft: =14
+                        RadiusBottomRight: =14
+                        RadiusTopLeft: =14
+                        RadiusTopRight: =14
+                      Children:
+                        - lblCompClienteTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gTextoSec
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =18
+                              Size: =10
+                              Text: ="CLIENTE"
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =10
+                        - lblCompVendedor:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gTextoSec
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =11
+                              Text: |-
+                                =If( IsBlank( gCompCliente ), "", "Código " & gCompCliente.CLIENTE_CODIGO & "   ·   " ) &
+                                gVendCod & " — " & gVendNom
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =70
+                        - lblCompCompetidorTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =18
+                              Size: =12
+                              Text: ="COMPETIDOR"
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =94
+                        - txtCompCompetidor:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Default: =
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =34
+                              HintText: ="Nombre de la marca o empresa"
+                              HoverBorderColor: =RGBA(0, 18, 107, 1)
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              Reset: =gResetComp
+                              Size: =12
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =114
+                        - lblCompSugeridos:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gTextoSec
+                              Font: =Font.'Open Sans'
+                              Height: =16
+                              Size: =10
+                              Text: |-
+                                =With( { prev: Concat( colCompSugeridos, Value, "  ·  " ) },
+                                    If( prev = "", "", "Ya cargados: " & prev ) )
+                              Width: =Parent.Width - 24
+                              Wrap: =false
+                              X: =12
+                              Y: =152
+                        - cmbCompCliente:
+                            Control: Classic/ComboBox@2.4.0
+                            Properties:
+                              BorderColor: =gLinea
+                              ChevronBackground: =RGBA(56, 96, 178, 1)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverBackground: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              DisplayFields: =["CLIENTE_NOMBRE","CLIENTE_CODIGO"]
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =34
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              InputTextPlaceholder: ="Buscá por nombre o código"
+                              Items: =dim_CLIENTES
+                              OnChange: =Set( gCompCliente, Self.Selected )
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 18, 107, 1)
+                              Reset: =gResetCompCli
+                              SearchFields: =["CLIENTE_NOMBRE","CLIENTE_CODIGO"]
+                              SelectMultiple: =false
+                              SelectionColor: =RGBA(255, 255, 255, 1)
+                              SelectionFill: =RGBA(56, 96, 178, 1)
+                              Size: =12
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =30
+                  - cardCompProducto:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =gLinea
+                        BorderThickness: =1
+                        Fill: =Color.White
+                        FillPortions: =0
+                        Height: =372
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        RadiusBottomLeft: =14
+                        RadiusBottomRight: =14
+                        RadiusTopLeft: =14
+                        RadiusTopRight: =14
+                      Children:
+                        - btnCompTipoBolsas:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =If( gCompTipo = "Bolsas", Color.White, gTexto )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =If( gCompTipo = "Bolsas", gNavy, gChip )
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Set( gCompTipo, "Bolsas" )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =12
+                              Text: ="Bolsas"
+                              Width: =(Parent.Width - 32) / 3
+                              X: =12
+                              Y: =32
+                        - btnCompTipoBobinas:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =If( gCompTipo = "Bobinas", Color.White, gTexto )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =If( gCompTipo = "Bobinas", gNavy, gChip )
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Set( gCompTipo, "Bobinas" )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =12
+                              Text: ="Bobinas"
+                              Width: =(Parent.Width - 32) / 3
+                              X: =btnCompTipoBolsas.X + btnCompTipoBolsas.Width + 4
+                              Y: =32
+                        - btnCompTipoBandejas:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =If( gCompTipo = "Bandejas", Color.White, gTexto )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =If( gCompTipo = "Bandejas", gNavy, gChip )
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Set( gCompTipo, "Bobinas" )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =12
+                              Text: ="Bandejas"
+                              Width: =(Parent.Width - 32) / 3
+                              X: =btnCompTipoBobinas.X + btnCompTipoBobinas.Width + 4
+                              Y: =32
+                        - btnCompTipoVasos:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =If( gCompTipo = "Vasos", Color.White, gTexto )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =If( gCompTipo = "Vasos", gNavy, gChip )
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Set( gCompTipo, "Vasos" )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =12
+                              Text: ="Vasos"
+                              Width: =(Parent.Width - 32) / 3
+                              X: =12
+                              Y: =66
+                        - btnCompTipoRafia:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =If( gCompTipo = "Rafia", Color.White, gTexto )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =If( gCompTipo = "Rafia", gNavy, gChip )
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Set( gCompTipo, "Rafia" )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =12
+                              Text: ="Rafia"
+                              Width: =(Parent.Width - 32) / 3
+                              X: =btnCompTipoBolsas.X + btnCompTipoBolsas.Width + 4
+                              Y: =66
+                        - btnCompTipoOtro:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =If( gCompTipo = "Otro", Color.White, gTexto )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =If( gCompTipo = "Otro", gNavy, gChip )
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Set( gCompTipo, "Otro" )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =12
+                              Text: ="Otro"
+                              Width: =(Parent.Width - 32) / 3
+                              X: =btnCompTipoBobinas.X + btnCompTipoBobinas.Width + 4
+                              Y: =66
+                        - lblCompTipoTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="TIPO DE PRODUCTO"
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =10
+                        - lblCompDescTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="DESCRIPCIÓN"
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =104
+                        - txtCompDesc:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =gLinea
+                              Default: =
+                              Font: =Font.'Open Sans'
+                              Height: =34
+                              HintText: ="Lo que dice el envase"
+                              HoverBorderColor: =RGBA(0, 18, 107, 1)
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Reset: =gResetComp
+                              Size: =12
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =124
+                        - lblCompMedidaTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="MEDIDA (opcional)"
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12
+                              Y: =164
+                        - lblCompUnidadTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="UNIDAD"
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12 + (Parent.Width - 28) / 2 + 4
+                              Y: =164
+                        - txtCompMedida:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =gLinea
+                              Default: =
+                              Font: =Font.'Open Sans'
+                              Height: =34
+                              HintText: ="90 X 110"
+                              HoverBorderColor: =RGBA(0, 18, 107, 1)
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              Reset: =gResetComp
+                              Size: =12
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12
+                              Y: =184
+                        - drpCompUnidad:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              ChevronBackground: =RGBA(56, 96, 178, 1)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverBackground: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =34
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              Items: =Sort( Distinct( dim_PRODUCTOS, PRODUCTO_UNIDAD ), Value )
+                              Items.Value: =Value
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 18, 107, 1)
+                              Reset: =gResetComp
+                              SelectionColor: =RGBA(255, 255, 255, 1)
+                              SelectionFill: =RGBA(56, 96, 178, 1)
+                              Size: =12
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12 + (Parent.Width - 28) / 2 + 4
+                              Y: =184
+                        - lblCompPrecioTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="PRECIO Bs"
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12
+                              Y: =224
+                        - lblCompCantTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="CANTIDAD"
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12 + (Parent.Width - 28) / 2 + 4
+                              Y: =224
+                        - txtCompPrecio:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =gLinea
+                              Default: ="Text input"
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              Height: =34
+                              HintText: ="0.00"
+                              HoverBorderColor: =RGBA(0, 18, 107, 1)
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              Reset: =gResetComp
+                              Size: =12
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12
+                              Y: =244
+                        - txtCompCant:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =gLinea
+                              Default: ="Text input"
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              Height: =34
+                              HintText: ="0"
+                              HoverBorderColor: =RGBA(0, 18, 107, 1)
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Reset: =gResetComp
+                              Size: =12
+                              Width: =(Parent.Width - 28) / 2
+                              X: =12 + (Parent.Width - 28) / 2 + 4
+                              Y: =244
+                        - lblCompObsTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="OBSERVACIÓN"
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =284
+                        - txtCompObs:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =gLinea
+                              Default: =
+                              Font: =Font.'Open Sans'
+                              Height: =56
+                              HintText: ="Opcional"
+                              HoverBorderColor: =RGBA(0, 18, 107, 1)
+                              HoverFill: =RGBA(186, 202, 226, 1)
+                              Mode: =TextMode.MultiLine
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Reset: =gResetComp
+                              Size: =12
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =304
+                  - cardCompHoy:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =gLinea
+                        BorderThickness: =1
+                        Fill: =Color.White
+                        FillPortions: =0
+                        Height: =If( CountRows( colCompHoy ) = 0, 72, 40 + CountRows( colCompHoy ) * 52 + 10 )
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        RadiusBottomLeft: =14
+                        RadiusBottomRight: =14
+                        RadiusTopLeft: =14
+                        RadiusTopRight: =14
+                      Children:
+                        - lblCompHoyTit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =18
+                              Size: =12
+                              Text: ="CARGADOS HOY  ·  " & CountRows( colCompHoy )
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =10
+                        - lblCompHoyVacio:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gTextoSec
+                              Font: =Font.'Open Sans'
+                              Height: =20
+                              Size: =11
+                              Text: ="Todavía no cargaste ningún relevamiento"
+                              Visible: =CountRows( colCompHoy ) = 0
+                              Width: =Parent.Width - 24
+                              X: =12
+                              Y: =36
+                        - galCompHoy:
+                            Control: Gallery@2.15.0
+                            Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Height: =CountRows( colCompHoy ) * 52
+                              Items: =colCompHoy
+                              ShowScrollbar: =false
+                              TemplateSize: =52
+                              Visible: =CountRows( colCompHoy ) > 0
+                              Width: =Parent.Width
+                              Y: =36
+                            Children:
+                              - lblGCompLinea:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =20
+                                    OnSelect: =Select(Parent)
+                                    Size: =11.5
+                                    Text: = ThisItem.COMPETIDOR & "  ·  " & ThisItem.COMP_DESCRIPCION & If( ThisItem.COMP_MEDIDA <> "", " " & ThisItem.COMP_MEDIDA, "" )
+                                    Width: =Parent.TemplateWidth - 56
+                                    Wrap: =false
+                                    X: =12
+                                    Y: =6
+                              - lblGCompDatos:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    OnSelect: =Select(Parent)
+                                    Size: =10.5
+                                    Text: ="Bs " & Text( ThisItem.COMP_PRECIO, "#,##0.00" ) & "  ·  " & ThisItem.COMP_CANTIDAD & " " & ThisItem.COMP_UNIDAD
+                                    Width: =Parent.TemplateWidth - 56
+                                    Wrap: =false
+                                    X: =12
+                                    Y: =26
+                              - icoGCompBorrar:
+                                  Control: Classic/Icon@2.5.0
+                                  Properties:
+                                    AutoDisableOnSelect: =false
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gRojo
+                                    Height: =24
+                                    Icon: =Icon.Trash
+                                    OnSelect: |-
+                                      =Remove( fact_COMPETENCIA, LookUp( fact_COMPETENCIA, ID = ThisItem.ID ) );
+                                      If( IsEmpty( Errors( fact_COMPETENCIA ) ),
+                                          Remove( colCompHoy, ThisItem );
+                                          Notify( "Relevamiento eliminado", NotificationType.Success ),
+                                          Notify( "No se pudo eliminar", NotificationType.Error ) )
+                                    Width: =24
+                                    X: =Parent.TemplateWidth - 40
+                                    Y: =14
+                              - rectGCompSep:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Fill: =gLinea
+                                    Height: =1
+                                    OnSelect: =Select(Parent)
+                                    Width: =Parent.TemplateWidth - 24
+                                    X: =12
+                                    Y: =Parent.TemplateHeight - 1
+            - btnGuardarComp_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =Color.White
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =gRojo
+                  Font: =Font.'Segoe UI'
+                  Height: =56
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                  OnSelect: |-
+                    =Set( gCompNombre,
+                        With( { t: Trim( txtCompCompetidor.Text ) },
+                            Upper( Left( t, 1 ) ) & Lower( Mid( t, 2 ) ) ) );
+                    Set( gCompDesc,   Trim( txtCompDesc.Text ) );
+                    Set( gCompUnidad, Trim( drpCompUnidad.Selected.Value ) );
+
+                    Set( gCompMsg,
+                        If( IsBlank( gCompCliente ),                 "Elegí el cliente",
+                            gCompNombre = "",                        "Escribí el competidor",
+                            IsBlank( gCompTipo ),                    "Elegí el tipo de producto",
+                            gCompDesc = "",                          "Escribí la descripción del producto",
+                            gCompUnidad = "",                        "Elegí la unidad",
+                            Value( txtCompPrecio.Text ) <= 0,        "El precio tiene que ser mayor a cero",
+                            Value( txtCompCant.Text ) < 1,           "La cantidad tiene que ser 1 o más",
+                            Upper( gCompUnidad ) = "PZA" And
+                                Value( txtCompCant.Text ) <> RoundDown( Value( txtCompCant.Text ), 0 ),
+                                                                     "Las piezas se cuentan enteras",
+                            "" ) );
+
+                    If( gCompMsg <> "",
+
+                        Notify( gCompMsg, NotificationType.Error ),
+
+                        Set( gCompNuevo,
+                            Patch( fact_COMPETENCIA, Defaults( fact_COMPETENCIA ),
+                                {
+                                    Title:              "REL-" & gVendCod & "-" & Text( Now(), "yyyymmdd-hhmmss" ),
+                                    RELEVAMIENTO_FECHA: Now(),
+                                    VENDEDOR_CODIGO:    gVendCod,
+                                    VENDEDOR_NOMBRE:    gVendNom,
+                                    dim_CLIENTES_ID: {
+                                        '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                                        Id:    gCompCliente.ID,
+                                        Value: gCompCliente.CLIENTE_NOMBRE
+                                    },
+                                    CLIENTE_CODIGO:   gCompCliente.CLIENTE_CODIGO,
+                                    CLIENTE_NOMBRE:   gCompCliente.CLIENTE_NOMBRE,
+                                    COMPETIDOR:       gCompNombre,
+                                    COMP_TIPO:        { Value: gCompTipo },
+                                    COMP_DESCRIPCION: gCompDesc,
+                                    COMP_MEDIDA:      Trim( txtCompMedida.Text ),
+                                    COMP_UNIDAD:      gCompUnidad,
+                                    COMP_PRECIO:      Value( txtCompPrecio.Text ),
+                                    COMP_CANTIDAD:    Value( txtCompCant.Text ),
+                                    COMP_OBSERVACION: Trim( txtCompObs.Text )
+                                } ) );
+
+                        If( IsBlank( gCompNuevo.ID ) Or gCompNuevo.ID = 0,
+
+                            Notify( "No se pudo guardar el relevamiento. Volvé a intentar.", NotificationType.Error ),
+
+                            Collect( colCompHoy, gCompNuevo );
+                            Notify( "Guardado · " & gCompNombre & " · " & gCompDesc, NotificationType.Success );
+                            Set( gCompTipo, Blank() );
+                            Reset( txtCompDesc ); Reset( txtCompMedida ); Reset( drpCompUnidad );
+                            Reset( txtCompPrecio ); Reset( txtCompCant ); Reset( txtCompObs )
+                        )
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =gRojoDark
+                  RadiusBottomLeft: =14
+                  RadiusBottomRight: =14
+                  RadiusTopLeft: =14
+                  RadiusTopRight: =14
+                  Size: =15
+                  Text: ="Guardar relevamiento"
+                  Width: =Parent.Width - 32
+                  X: =16
+                  Y: =712
+            - cmpPantalla_4:
+                Control: CanvasComponent
+                ComponentName: cmpPantalla
+                Properties:
+                  Height: =80
+                  OnCobranza: =Navigate(PantallaCobranza_1)
+                  OnCompetencia: =Navigate(PantallaCompetencia_1)
+                  OnPedido: =Navigate(PantallaPedido_1)
+                  OnVisita: =Navigate(PantallaVisita_1)
+                  Visible: =gVeOtrasPantallas
+                  Width: =Parent.Width
+

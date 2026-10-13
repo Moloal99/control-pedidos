@@ -1,0 +1,1133 @@
+﻿Screens:
+  PantallaPedido_1:
+    Properties:
+      Fill: =gFondo
+      Height: =App.Height
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =ClearCollect( colUltimoPed,
+            With(
+                { ultimo:
+                    First(
+                        SortByColumns(
+                            Filter( fact_PEDIDOS, CLIENTE_CODIGO = varCliente.CLIENTE_CODIGO ),
+                            "PEDIDO_FECHA", SortOrder.Descending
+                        )
+                    ).PEDIDO_NUMERO
+                },
+                Filter( fact_PEDIDO_LINEAS, PEDIDO_NUMERO = ultimo )
+            )
+        )
+      Width: =App.Width
+    Children:
+      - ctnPantallaPedido:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =Parent.Width
+          Children:
+            - cmpEncabezado_5:
+                Control: CanvasComponent
+                ComponentName: cmpEncabezado
+                Properties:
+                  Fill: =gNavy
+                  Height: =56
+                  Width: =Parent.Width
+            - ctnPantallaPedidoDatos:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Height: =656
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: |
+                    =12
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =14
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =14
+                  RadiusBottomLeft: =16
+                  RadiusBottomRight: =16
+                  Width: =Parent.Width
+                  Y: =56
+                Children:
+                  - lblPedidoAvisoVendedor:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =gRojo
+                        Fill: =ColorValue("#FEF2F2")
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =32
+                        LayoutMinHeight: =32
+                        LayoutMinWidth: =16
+                        PaddingBottom: =6
+                        PaddingTop: =6
+                        Size: =12
+                        Text: ="⚠  Estás cargando a nombre de " & gVendNom
+                        Visible: =gVendCod <> gUsrCod
+                  - ctnPedidoAnterior:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =0
+                        Height: =120
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - cardUltimo_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =gAzul
+                              BorderThickness: =1
+                              Fill: =gAzulBg
+                              Height: =170
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              RadiusBottomLeft: =14
+                              RadiusBottomRight: =14
+                              RadiusTopLeft: =14
+                              RadiusTopRight: =14
+                              Visible: =Not(IsBlank(varCliente)) And CountRows(galUltimo_1.AllItems) > 0
+                            Children:
+                              - lblUltimoTit_1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gAzul
+                                    Font: =Font.'Open Sans'
+                                    Height: =20
+                                    Size: =12.5
+                                    Text: |-
+                                      ="Último pedido — " & CountRows(galUltimo_1.AllItems) &
+                                      If( CountRows(galUltimo_1.AllItems) = 1, " producto", " productos" )
+                                    Width: =Parent.Width - 28
+                                    X: =14
+                                    Y: =12
+                              - galUltimo_1:
+                                  Control: Gallery@2.15.0
+                                  Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Height: =124
+                                    Items: =colUltimoPed
+                                    Width: =Parent.Width - 16
+                                    X: =8
+                                    Y: =36
+                                  Children:
+                                    - lblUProd_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =ThisItem.PRODUCTO_DESCRIPCION
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =Parent.TemplateWidth * 0.6 - 12
+                                          X: =6
+                                          Y: =4
+                                    - lblUSub_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Right
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =gAzul
+                                          Font: =Font.'Open Sans'
+                                          Height: =32
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: ="Bs " & Text(ThisItem.LINEA_CANTIDAD * ThisItem.LINEA_PRECIO_UNITARIO, "#,##0.00")
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =Parent.TemplateWidth * 0.4 - 12
+                                          X: =Parent.TemplateWidth * 0.6
+                                          Y: =4
+                                    - lblUCant_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =gTextoSec
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Lighter
+                                          Height: =14
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: =ThisItem.LINEA_CANTIDAD & " " & ThisItem.PRODUCTO_UNIDAD
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =Parent.TemplateWidth * 0.6 - 12
+                                          X: =6
+                                          Y: =22
+                        - lblPedidoOK_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =gVerde
+                              BorderThickness: =1
+                              Color: =gVerde
+                              Fill: =RGBA(228, 244, 236, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =56
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              Size: =14
+                              Text: |-
+                                ="✓ Pedido guardado: " & gPedidoResumen.Lineas & " líneas · Bs " & Text(gPedidoResumen.Total, "#,##0.00")
+                              Visible: =gPedidoGuardado
+                              Width: =Parent.Width - 24
+                        - btnAgregarMas_1:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =gTexto
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =gChip
+                              Font: =Font.'Open Sans'
+                              Height: =42
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: '=Set( gPedidoGuardado, false )   '
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              Size: =13.5
+                              Text: ="Agregar más productos"
+                              Visible: =gPedidoGuardado
+                              Width: =Parent.Width - 24
+                              X: |+
+                                =12
+                              Y: =txtCant_1.Y + txtCant_1.Height + 12
+                  - ctnPedidoActual:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =0
+                        Height: =lblTitAgregar_1.Height + cardAgregar_1.Height + 16
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - lblTitAgregar_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gTexto
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: ="AGREGAR PRODUCTO"
+                              Visible: =Not( gPedidoGuardado )
+                        - cardAgregar_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =gLinea
+                              BorderThickness: =1
+                              Fill: =Color.White
+                              FillPortions: =0
+                              Height: =btnAgregar_1.Y + btnAgregar_1.Height + 14
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              RadiusBottomLeft: =14
+                              RadiusBottomRight: =14
+                              RadiusTopLeft: =14
+                              RadiusTopRight: =14
+                              Visible: =Not( gPedidoGuardado )
+                            Children:
+                              - lblProd_1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Producto"
+                                    Width: =Parent.Width - 28
+                                    X: =14
+                                    Y: =12
+                              - cmbProducto_1:
+                                  Control: Classic/ComboBox@2.4.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    ChevronBackground: =RGBA(56, 96, 178, 1)
+                                    ChevronFill: =RGBA(255, 255, 255, 1)
+                                    ChevronHoverBackground: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    DisplayFields: =["PRODUCTO_DESCRIPCION"]
+                                    Font: =Font.'Open Sans'
+                                    Height: =39
+                                    HoverFill: =RGBA(186, 202, 226, 1)
+                                    InputTextPlaceholder: ="Buscar productos..."
+                                    Items: =dim_PRODUCTOS
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =RGBA(0, 18, 107, 1)
+                                    SearchFields: =["PRODUCTO_DESCRIPCION","PRODUCTO_TERMINADO_CODIGO"]
+                                    SelectMultiple: =false
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =RGBA(56, 96, 178, 1)
+                                    Size: =10.5
+                                    Width: =Parent.Width - 28
+                                    X: =14
+                                    Y: =30
+                              - lblCant_1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: |-
+                                      =If( IsBlank(cmbProducto_1.Selected),
+                                          "Cantidad",
+                                          "Cantidad en " & cmbProducto_1.Selected.PRODUCTO_UNIDAD )
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14
+                                    Y: =lblMicronaje.Y + lblMicronaje.Height + 12
+                              - lblPrecio_1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Precio (Bs)"
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14 + (Parent.Width - 32) / 2 + 4
+                                    Y: =lblCant_1.Y
+                              - txtCant_1:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Default: =
+                                    Font: =Font.'Open Sans'
+                                    Format: '=TextFormat.Number '
+                                    Height: =30
+                                    HintText: ="0"
+                                    HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                    HoverFill: =RGBA(186, 202, 226, 1)
+                                    Size: =14
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14
+                                    Y: =lblCant_1.Y + lblCant_1.Height + 4
+                              - txtPrecio_1:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Default: =
+                                    Font: =Font.'Open Sans'
+                                    Format: '=TextFormat.Number '
+                                    Height: =30
+                                    HintText: ="0"
+                                    HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                    HoverFill: =RGBA(186, 202, 226, 1)
+                                    Size: =14
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14 + (Parent.Width - 32) / 2 + 4
+                                    Y: =txtCant_1.Y
+                              - btnAgregar_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderColor: =ColorFade(Self.Fill, -15%)
+                                    BorderStyle: =BorderStyle.Dashed
+                                    Color: =gNavy
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    Fill: =Color.White
+                                    Font: =Font.'Open Sans'
+                                    Height: =36
+                                    HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                                    OnSelect: |-
+                                      =Set( gUnidadLinea, Upper(Trim(cmbProducto_1.Selected.PRODUCTO_UNIDAD)) );
+
+                                      Set( gAlmacenLinea,
+                                        With( { cod: cmbProducto_1.Selected.PRODUCTO_TERMINADO_CODIGO },
+                                          If( StartsWith(cod, "5T201") Or StartsWith(cod, "5T202"),
+                                                "ALMACÉN P11 — EXTRUSIÓN",
+                                              StartsWith(cod, "5T203"),
+                                                "ALMACÉN P12 — TERMOFORMADO",
+                                              StartsWith(cod, "5T204"),
+                                                "ALMACÉN P13 — EXPANDIDO",
+                                              StartsWith(cod, "5T205"),
+                                                "ALMACÉN P14 — INYECCIÓN",
+                                              StartsWith(cod, "5T206"),
+                                                "ALMACÉN P15 — RAFIA",
+                                              "SIN ALMACÉN ASIGNADO"
+                                          )
+                                        )
+                                      );
+
+                                      Set( gMsgLinea,
+                                        If( IsBlank(gVisita),
+                                              "Primero registrá la visita",
+                                            IsBlank(cmbProducto_1.Selected),
+                                              "Falta elegir el producto",
+                                            Value(txtCant_1.Text) < 1,
+                                              "La cantidad tiene que ser 1 o más",
+                                            gUnidadLinea = "PZA" And Value(txtCant_1.Text) <> RoundDown(Value(txtCant_1.Text), 0),
+                                              "Las piezas se venden enteras: la cantidad no puede tener decimales",
+                                            Value(txtPrecio_1.Text) <= 0,
+                                              "El precio unitario tiene que ser mayor a cero",
+                                            ""
+                                        )
+                                      );
+
+                                      If(
+                                        gMsgLinea <> "",
+
+                                        Notify( gMsgLinea, NotificationType.Error ),
+
+                                        Collect( colPedido,
+                                          {
+                                            Prod:             cmbProducto_1.Selected,
+                                            Descripcion:      cmbProducto_1.Selected.PRODUCTO_DESCRIPCION,
+                                            Codigo:           cmbProducto_1.Selected.PRODUCTO_TERMINADO_CODIGO,
+                                            Almacen:          gAlmacenLinea,
+                                            Unidad:           cmbProducto_1.Selected.PRODUCTO_UNIDAD,
+                                            Micronaje:        cmbProducto_1.Selected.PRODUCTO_MICRONAJE,
+                                            PesoPromedio:     cmbProducto_1.Selected.PRODUCTO_PESO_PROMEDIO,
+                                            PesoLinea:        Value(txtCant_1.Text) * cmbProducto_1.Selected.PRODUCTO_PESO_PROMEDIO,
+                                            BolsasPorPaquete: cmbProducto_1.Selected.PRODUCTO_BOLSAS_POR_PAQUETE,
+                                            PaquetesPorJaba:  cmbProducto_1.Selected.PRODUCTO_PAQUETES_POR_JABA,
+                                            JabitasPorJaba:   cmbProducto_1.Selected.PRODUCTO_JABITAS_POR_JABA,
+                                            JabasPorBulto:    cmbProducto_1.Selected.PRODUCTO_JABAS_POR_BULTO,
+                                            PesoPorBolsa:     cmbProducto_1.Selected.PRODUCTO_PESO_POR_BOLSA,
+                                            PesoPorBulto:     cmbProducto_1.Selected.PRODUCTO_PESO_POR_BULTO,
+                                            PesoPorPaquete:   cmbProducto_1.Selected.PRODUCTO_PESO_POR_PAQUETE,
+                                            PesoPorJaba:      cmbProducto_1.Selected.PRODUCTO_PESO_POR_JABA,
+                                            Cantidad:         Value(txtCant_1.Text),
+                                            Precio:           Value(txtPrecio_1.Text)
+                                          }
+                                        );
+
+                                        Reset(cmbProducto_1);
+                                        Reset(txtCant_1);
+                                        Reset(txtPrecio_1);
+                                        Set(gPedidoGuardado, false)
+                                      )
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Size: =14
+                                    Text: ="+ Agregar al pedido"
+                                    Width: =Parent.Width - 28
+                                    X: =14
+                                    Y: =txtCant_1.Y + txtCant_1.Height + 12
+                              - lblBolsasPorPaqueteTitulo:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Bolsas por paquete"
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14
+                                    Y: =80
+                              - lblPaquetesPorJabaTitulo:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Paquetes por jaba"
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14 + (Parent.Width - 32) / 2 + 4
+                                    Y: =80
+                              - lblBolsasPorPaquete:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =21
+                                    Size: =12
+                                    Text: =If( IsBlank(cmbProducto_1.Selected), "-", Text(cmbProducto_1.Selected.PRODUCTO_BOLSAS_POR_PAQUETE) )
+                                    Width: =lblBolsasPorPaqueteTitulo.Width - 13
+                                    X: =lblBolsasPorPaqueteTitulo.X + 13
+                                    Y: =98
+                              - lblPaquetesPorJaba:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =21
+                                    Size: =12
+                                    Text: =If( IsBlank(cmbProducto_1.Selected), "-", Text(cmbProducto_1.Selected.PRODUCTO_PAQUETES_POR_JABA) )
+                                    Width: =lblPaquetesPorJabaTitulo.Width - 11
+                                    X: =lblPaquetesPorJabaTitulo.X + 11
+                                    Y: =98
+                              - lblJabitasPorJabaTitulo:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Jabitas por jaba"
+                                    Width: =175
+                                    X: =14
+                                    Y: =130
+                              - lblJabasPorBultoTitulo:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Jabas por bulto"
+                                    Width: =(Parent.Width - 32) / 2
+                                    X: =14 + (Parent.Width - 32) / 2 + 4
+                                    Y: =130
+                              - lblJabitasPorJaba:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =21
+                                    Size: =12
+                                    Text: =If( IsBlank(cmbProducto_1.Selected), "-", Text(cmbProducto_1.Selected.PRODUCTO_JABITAS_POR_JABA) )
+                                    Width: =lblJabitasPorJabaTitulo.Width - 13
+                                    X: =lblJabitasPorJabaTitulo.X + 13
+                                    Y: =148
+                              - lblJabasPorBulto:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =21
+                                    Size: =12
+                                    Text: =If( IsBlank(cmbProducto_1.Selected), "-", Text(cmbProducto_1.Selected.PRODUCTO_JABAS_POR_BULTO) )
+                                    Width: =lblJabasPorBultoTitulo.Width - 11
+                                    X: =lblJabasPorBultoTitulo.X + 11
+                                    Y: =148
+                              - lblPesoPromedioTitulo:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Peso Promedio"
+                                    Width: =lblJabasPorBultoTitulo.Width
+                                    X: =lblJabasPorBultoTitulo.X
+                                    Y: =lblMicronajeTitulo.Y
+                              - lblMicronajeTitulo:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gTextoSec
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    Size: =12.5
+                                    Text: ="Micronaje"
+                                    Width: =lblJabitasPorJabaTitulo.Width
+                                    X: =lblJabitasPorJabaTitulo.X
+                                    Y: =lblJabitasPorJaba.Y + lblJabitasPorJaba.Height + 10
+                              - lblMicronaje:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =21
+                                    Size: =12
+                                    Text: =If( IsBlank(cmbProducto_1.Selected), "-", Text(cmbProducto_1.Selected.PRODUCTO_JABITAS_POR_JABA) )
+                                    Width: =lblMicronajeTitulo.Width
+                                    X: =lblMicronajeTitulo.X
+                                    Y: =lblMicronajeTitulo.Y + lblMicronajeTitulo.Height
+                              - lblPesoPromedio:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =21
+                                    Size: =12
+                                    Text: =If( IsBlank(cmbProducto_1.Selected), "-", Text(cmbProducto_1.Selected.PRODUCTO_PESO_PROMEDIO) )
+                                    Width: =lblPesoPromedioTitulo.Width
+                                    X: =lblPesoPromedioTitulo.X
+                                    Y: =lblPesoPromedioTitulo.Y + lblPesoPromedioTitulo.Height
+                  - ctnPedidoActualRegistro:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =0
+                        Height: =cardLista_1.Height + 90
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - lblTitPedido_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gTexto
+                              FillPortions: =1
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: ="PEDIDO"
+                        - cardLista_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =gLinea
+                              BorderThickness: =1
+                              Fill: =Color.White
+                              FillPortions: =0
+                              Height: =320
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              RadiusBottomLeft: =14
+                              RadiusBottomRight: =14
+                              RadiusTopLeft: =14
+                              RadiusTopRight: =14
+                              Width: =360
+                            Children:
+                              - galPedido_1:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Height: =Parent.Height - 12
+                                    Items: |
+                                      =colPedido
+                                    TemplateSize: =46
+                                    Width: =Parent.Width - 12
+                                    X: =6
+                                    Y: =6
+                                  Children:
+                                    - lblGProd_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          OnSelect: =Select(Parent)
+                                          Size: =10
+                                          Text: '=ThisItem.Descripcion    '
+                                          Width: =Parent.TemplateWidth * 0.62 - 12
+                                          X: =6
+                                          Y: =6
+                                    - lblGSub_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Right
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =gTextoSec
+                                          Font: =Font.'Open Sans'
+                                          Height: =34
+                                          OnSelect: =Select(Parent)
+                                          Size: =12
+                                          Text: ="Bs " & Text(ThisItem.Cantidad * ThisItem.Precio, "#,##0.00")
+                                          Width: =Parent.TemplateWidth * 0.38 - 48
+                                          X: =Parent.TemplateWidth * 0.62
+                                          Y: =6
+                                    - icoBorrar_1:
+                                        Control: Classic/Icon@2.5.0
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =gCritico
+                                          Height: =24
+                                          Icon: =Icon.Trash
+                                          OnSelect: =Remove( colPedido, ThisItem )
+                                          Width: =24
+                                          X: =Parent.TemplateWidth - 36
+                                          Y: =10
+                                    - lblGDet_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =gTextoSec
+                                          Font: =Font.'Open Sans'
+                                          Height: =16
+                                          OnSelect: =Select(Parent)
+                                          Size: =10
+                                          Text: =ThisItem.Cantidad & " " & ThisItem.Unidad & " × Bs " & Text(ThisItem.Precio, "#,##0.00")
+                                          Width: =Parent.TemplateWidth * 0.62 - 12
+                                          X: =6
+                                          Y: =24
+                        - lblTotal_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gNavy
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              Height: =32
+                              LayoutMinWidth: =334
+                              OnSelect: =
+                              PaddingRight: =12
+                              Size: =15
+                              Text: ="Bs " & Text( Sum(colPedido, Cantidad * Precio), "#,##0.00" )
+                              Width: =328
+                              X: =6
+                              Y: =Parent.Height + 10
+            - btnGuardarPedido_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =Color.White
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: |-
+                    =If( IsBlank(gVisita) Or IsEmpty(colPedido),
+                        DisplayMode.Disabled,
+                        DisplayMode.Edit )
+                  Fill: =gRojo
+                  Font: =Font.'Segoe UI'
+                  Height: =56
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                  OnSelect: |-
+                    =Set( gMsgPedido,
+                      If( IsBlank(gVisita),
+                            "Primero registrá la visita",
+                          CountRows(colPedido) = 0,
+                            "El pedido no tiene productos cargados",
+                          IsBlank(gVisitaFormaPago),
+                            "El pedido no tiene forma de pago — volvé a la visita y elegí Crédito o Contado",
+                          ""
+                      )
+                    );
+                    Set( gPuedeGuardar, gMsgPedido = "" );
+
+                    If( Not(gPuedeGuardar),
+                        Notify( gMsgPedido, NotificationType.Error )
+                    );
+
+                    Set( gNroPedido, "PED-" & gVendCod & "-" & Text(Now(), "yyyymmdd-hhmmss") );
+                    Set( gTotalPedido, Sum(colPedido, Cantidad * Precio) );
+                    Set( gPesoTotal, Sum(colPedido, PesoLinea) );
+                    Set( gEsContado, gVisitaFormaPago = "Contado" );
+
+                    /* Cuantos almacenes distintos tiene este pedido: es la cantidad
+                       de proformas que TIENEN que quedar creadas. */
+                    Set( gCantAlmacenes, CountRows( Distinct( colPedido, Almacen ) ) );
+
+                    Set( gVisitaRef, {
+                      '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                      Id:    gVisita.ID,
+                      Value: gVisita.VISITA_TITULO
+                    });
+
+                    If( gPuedeGuardar,
+                      Patch( fact_PEDIDOS, Defaults(fact_PEDIDOS),
+                        {
+                          PEDIDO_NUMERO: gNroPedido,
+
+                          fact_VISITAS_ID: gVisitaRef,
+
+                          dim_CLIENTES_ID: {
+                            '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                            Id:    varCliente.ID,
+                            Value: varCliente.CLIENTE_NOMBRE
+                          },
+                          CLIENTE_CODIGO: varCliente.CLIENTE_CODIGO,
+                          CLIENTE_NOMBRE: varCliente.CLIENTE_NOMBRE,
+
+                          /* gVendSel es el vendedor ATRIBUIDO: normalmente vos,
+                             o el vendedor cubierto si un supervisor carga por otro. */
+                          dim_VENDEDORES_ID: {
+                            '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                            Id:    gVendSel.ID,
+                            Value: gVendSel.VENDEDOR_NOMBRE
+                          },
+                          VENDEDOR_CODIGO: gVendCod,
+                          VENDEDOR_NOMBRE: gVendNom,
+
+                          /* Quien lo tipeo. Vacio cuando es el propio vendedor. */
+                          CARGADO_POR: If( gVendCod <> gUsrCod, gUsrNom, "" ),
+
+                          PEDIDO_TIPO_CONTACTO: If( Not(IsBlank(gTipoContacto)), { Value: gTipoContacto } ),
+                          PEDIDO_FORMA_PAGO:    If( Not(IsBlank(gVisitaFormaPago)), { Value: gVisitaFormaPago } ),
+                          PEDIDO_DIAS_CREDITO:  gDiasCredito,
+
+                          PEDIDO_FECHA: Now(),
+                          PEDIDO_FECHA_VENCIMIENTO:
+                            If( gVisitaFormaPago = "Crédito", DateAdd(Now(), gDiasCredito, TimeUnit.Days), Now() ),
+
+                          PEDIDO_TOTAL:           gTotalPedido,
+
+                          /* Todo pedido nace sin cobrar, tambien el contado.
+                             El cobro se registra en Cobranza y lo confirma el rol cobranzas,
+                             igual que el credito. Asi ninguna venta queda fuera del control. */
+                          PEDIDO_TOTAL_PAGADO:    0,
+                          PEDIDO_SALDO_PENDIENTE: gTotalPedido,
+                          PEDIDO_ESTADO_PAGO:     { Value: "Pendiente" }
+                        }
+                      )
+                    );
+
+                    Set( gCabOk, gPuedeGuardar And IsEmpty(Errors(fact_PEDIDOS)) );
+
+                    If( gPuedeGuardar And Not(gCabOk),
+                        Notify( "No se pudo crear el pedido: " & First( Errors( fact_PEDIDOS ) ).Message, NotificationType.Error )
+                    );
+
+                    If( gCabOk,
+
+                      /* ---------- LÍNEAS: se guarda el resultado del ForAll para poder verificarlo ---------- */
+                      ClearCollect( colPedLineasOk,
+                        ForAll( colPedido As linea,
+                          Patch( fact_PEDIDO_LINEAS, Defaults(fact_PEDIDO_LINEAS),
+                            {
+                              PRODUCTO_DESCRIPCION: linea.Descripcion,
+                              PEDIDO_NUMERO:        gNroPedido,
+
+                              dim_PRODUCTOS_ID: {
+                                '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                                Id:    linea.Prod.ID,
+                                Value: linea.Prod.PRODUCTO_DESCRIPCION
+                              },
+                              PRODUCTO_TERMINADO_CODIGO: linea.Codigo,
+                              LINEA_ALMACEN:             linea.Almacen,
+
+                              PROFORMA_CLAVE: gNroPedido & "-" &
+                                Switch( linea.Almacen,
+                                  "ALMACÉN P11 — EXTRUSIÓN",    "P11",
+                                  "ALMACÉN P12 — TERMOFORMADO", "P12",
+                                  "ALMACÉN P13 — EXPANDIDO",    "P13",
+                                  "ALMACÉN P14 — INYECCIÓN",    "P14",
+                                  "ALMACÉN P15 — RAFIA",        "P15",
+                                  "SIN" ),
+                              LINEA_CANTIDAD_DESPACHADA: 0,
+
+                              LINEA_CANTIDAD:        linea.Cantidad,
+                              LINEA_PRECIO_UNITARIO: linea.Precio,
+
+                              PRODUCTO_UNIDAD:             linea.Unidad,
+                              PRODUCTO_MICRONAJE:          linea.Micronaje,
+                              PRODUCTO_PESO_PROMEDIO:      linea.PesoPromedio,
+                              PRODUCTO_BOLSAS_POR_PAQUETE: linea.BolsasPorPaquete,
+                              PRODUCTO_PAQUETES_POR_JABA:  linea.PaquetesPorJaba,
+                              PRODUCTO_JABITAS_POR_JABA:   linea.JabitasPorJaba,
+                              PRODUCTO_JABAS_POR_BULTO:    linea.JabasPorBulto,
+                              PRODUCTO_PESO_POR_BOLSA:     linea.PesoPorBolsa,
+                              PRODUCTO_PESO_POR_BULTO:     linea.PesoPorBulto,
+                              PRODUCTO_PESO_POR_PAQUETE:   linea.PesoPorPaquete,
+                              PRODUCTO_PESO_POR_JABA:      linea.PesoPorJaba
+                            }
+                          )
+                        )
+                      );
+
+                      Set( gLinPedOk,
+                          IsEmpty( Errors( fact_PEDIDO_LINEAS ) )
+                          And CountRows( Filter( colPedLineasOk, Not( IsBlank( ID ) ) ) ) = CountRows( colPedido ) );
+
+                      If( Not( gLinPedOk ),
+
+                        /* ---------- FALLARON LAS LÍNEAS: se deshace todo ---------- */
+                        ForAll( Filter( colPedLineasOk, Not( IsBlank( ID ) ) ) As b,
+                          Remove( fact_PEDIDO_LINEAS, LookUp( fact_PEDIDO_LINEAS, ID = b.ID ) ) );
+
+                        ClearCollect( colPedLimpieza,
+                          Filter( fact_PEDIDO_LINEAS, PEDIDO_NUMERO = gNroPedido ) );
+
+                        ForAll( colPedLimpieza As r,
+                          Remove( fact_PEDIDO_LINEAS, LookUp( fact_PEDIDO_LINEAS, ID = r.ID ) ) );
+
+                        Remove( fact_PEDIDOS, LookUp( fact_PEDIDOS, PEDIDO_NUMERO = gNroPedido ) );
+
+                        Notify(
+                          "No se pudo guardar el pedido completo: se grabaron " &
+                          CountRows( Filter( colPedLineasOk, Not( IsBlank( ID ) ) ) ) & " de " &
+                          CountRows( colPedido ) & " productos. No se creó nada y tus productos siguen cargados. Volvé a intentar." &
+                          If( Not( IsEmpty( Errors( fact_PEDIDO_LINEAS ) ) ),
+                              " (" & First( Errors( fact_PEDIDO_LINEAS ) ).Message & ")", "" ),
+                          NotificationType.Error ),
+
+                        /* ---------- LÍNEAS OK: ahora las proformas, una por almacén ---------- */
+                        ClearCollect( colPedProfOk,
+                          ForAll( Sort( Distinct(colPedido, Almacen), Value ) As alm,
+                            With( { cod:
+                                Switch( alm.Value,
+                                  "ALMACÉN P11 — EXTRUSIÓN",    "P11",
+                                  "ALMACÉN P12 — TERMOFORMADO", "P12",
+                                  "ALMACÉN P13 — EXPANDIDO",    "P13",
+                                  "ALMACÉN P14 — INYECCIÓN",    "P14",
+                                  "ALMACÉN P15 — RAFIA",        "P15",
+                                  "SIN" ) },
+                              Patch( fact_PROFORMAS, Defaults(fact_PROFORMAS),
+                                {
+                                  PROFORMA_TITULO: gNroPedido & "-" & cod,
+                                  PROFORMA_CLAVE:  gNroPedido & "-" & cod,
+                                  PEDIDO_NUMERO:   gNroPedido,
+
+                                  dim_CLIENTES_ID: {
+                                    '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                                    Id:    varCliente.ID,
+                                    Value: varCliente.CLIENTE_NOMBRE
+                                  },
+                                  CLIENTE_CODIGO: varCliente.CLIENTE_CODIGO,
+                                  CLIENTE_NOMBRE: varCliente.CLIENTE_NOMBRE,
+
+                                  VENDEDOR_CODIGO: gVendCod,
+                                  VENDEDOR_NOMBRE: gVendNom,
+
+                                  PROFORMA_ALMACEN: alm.Value,
+                                  PROFORMA_FECHA:   Now(),
+                                  PROFORMA_TOTAL:   Sum( Filter(colPedido, Almacen = alm.Value), Cantidad * Precio ),
+                                  PROFORMA_TOTAL_DESPACHADO: 0,
+                                  PROFORMA_ESTADO: { Value: "Sin número" }
+                                }
+                              )
+                            )
+                          )
+                        );
+
+                        /* Mismo criterio que las lineas: no alcanza con que Errors este vacio,
+                           tienen que estar las N proformas con ID real. */
+                        Set( gProfOk,
+                            IsEmpty( Errors( fact_PROFORMAS ) )
+                            And CountRows( Filter( colPedProfOk, Not( IsBlank( ID ) ) ) ) = gCantAlmacenes );
+
+                        If( Not( gProfOk ),
+
+                          /* ---------- FALLARON LAS PROFORMAS: se deshace TODO ---------- */
+                          /* 1) proformas confirmadas por el ForAll */
+                          ForAll( Filter( colPedProfOk, Not( IsBlank( ID ) ) ) As p,
+                            Remove( fact_PROFORMAS, LookUp( fact_PROFORMAS, ID = p.ID ) ) );
+
+                          /* 2) barrido de proformas que el paso 1 no haya visto */
+                          ClearCollect( colPedProfLimpieza,
+                            Filter( fact_PROFORMAS, PEDIDO_NUMERO = gNroPedido ) );
+                          ForAll( colPedProfLimpieza As r,
+                            Remove( fact_PROFORMAS, LookUp( fact_PROFORMAS, ID = r.ID ) ) );
+
+                          /* 3) las lineas, que si se habian creado bien */
+                          ClearCollect( colPedLimpieza,
+                            Filter( fact_PEDIDO_LINEAS, PEDIDO_NUMERO = gNroPedido ) );
+                          ForAll( colPedLimpieza As r,
+                            Remove( fact_PEDIDO_LINEAS, LookUp( fact_PEDIDO_LINEAS, ID = r.ID ) ) );
+
+                          /* 4) la cabecera */
+                          Remove( fact_PEDIDOS, LookUp( fact_PEDIDOS, PEDIDO_NUMERO = gNroPedido ) );
+
+                          Notify(
+                            "El pedido tiene " & gCantAlmacenes & " almacén(es) y solo se crearon " &
+                            CountRows( Filter( colPedProfOk, Not( IsBlank( ID ) ) ) ) &
+                            " proforma(s). No se guardó nada y tus productos siguen cargados. Volvé a intentar." &
+                            If( Not( IsEmpty( Errors( fact_PROFORMAS ) ) ),
+                                " (" & First( Errors( fact_PROFORMAS ) ).Message & ")", "" ),
+                            NotificationType.Error ),
+
+                          /* ---------- TODO OK: correo y cierre ---------- */
+                          Set( gPedidoResumen, { Lineas: CountRows(colPedido), Total: gTotalPedido } );
+
+                          Set( gMailFilas,
+                            Concat(
+                              Sort( Distinct(colPedido, Almacen), Value ) As alm,
+
+                              "<tr><td colspan='5' style='padding:12px 9px 6px;background:#E6F0F9;color:#0B3B82;font-size:12px;font-weight:700;letter-spacing:0.04em;border-top:2px solid #C3D5EC;'>" &
+                              alm.Value &
+                              "<span style='float:right;font-weight:600;'>" &
+                              Text( Sum(Filter(colPedido, Almacen = alm.Value), PesoLinea), "#,##0.00" ) & " kg</span>" &
+                              "</td></tr>" &
+
+                              Concat( Filter(colPedido, Almacen = alm.Value) As lin,
+                                "<tr>" &
+                                "<td style='padding:7px 9px;border-bottom:1px solid #ececec;'>" & lin.Codigo & "</td>" &
+                                "<td style='padding:7px 9px;border-bottom:1px solid #ececec;'>" & lin.Descripcion & "</td>" &
+                                "<td style='padding:7px 9px;border-bottom:1px solid #ececec;text-align:right;'>" & lin.Cantidad & " " & lin.Unidad & "</td>" &
+                                "<td style='padding:7px 9px;border-bottom:1px solid #ececec;text-align:right;'>" & Text(lin.Precio, "#,##0.00") & "</td>" &
+                                "<td style='padding:7px 9px;border-bottom:1px solid #ececec;text-align:right;'>" & Text(lin.Cantidad * lin.Precio, "#,##0.00") & "</td>" &
+                                "</tr>"
+                              )
+                            )
+                          );
+
+                          Set( gMailCuerpo,
+                            "<div style='font-family:Segoe UI,Arial,sans-serif;color:#333;max-width:720px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;background:#fff;'>" &
+
+                            "<div style='background:#0B3B82;color:#fff;padding:16px 20px;'>" &
+                            "<div style='font-size:18px;font-weight:600;'>Plásticos Carmen — Nuevo pedido</div>" &
+                            "<div style='font-size:13px;opacity:0.85;'>" & gNroPedido & " &middot; " & Text(Now(), "dd/mm/yyyy hh:mm") & "</div>" &
+                            "</div>" &
+
+                            "<div style='padding:18px 20px;'>" &
+                            "<table style='width:100%;font-size:14px;border-collapse:collapse;margin-bottom:18px;'>" &
+                            "<tr><td style='padding:4px 0;color:#777;width:160px;'>Código cliente</td><td style='padding:4px 0;font-weight:600;'>" & varCliente.CLIENTE_CODIGO & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Cliente</td><td style='padding:4px 0;font-weight:600;'>" & varCliente.CLIENTE_NOMBRE & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Dirección</td><td style='padding:4px 0;'>" &
+                                If( IsBlank(varCliente.CLIENTE_DIRECCION) Or varCliente.CLIENTE_DIRECCION = "0",
+                                    "&mdash;", varCliente.CLIENTE_DIRECCION ) & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Teléfono</td><td style='padding:4px 0;'>" &
+                                If( IsBlank(varCliente.CLIENTE_TELEFONO) Or varCliente.CLIENTE_TELEFONO = "0",
+                                    "&mdash;", varCliente.CLIENTE_TELEFONO ) & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Vendedor</td><td style='padding:4px 0;'>" & gVendCod & " &mdash; " & gVendNom & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Tipo de contacto</td><td style='padding:4px 0;'>" & gTipoContacto & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Forma de pago</td><td style='padding:4px 0;'>" & gVisitaFormaPago & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;'>Días de crédito</td><td style='padding:4px 0;'>" &
+                                If( gEsContado, "No aplica", Text(gDiasCredito) & " días" ) & "</td></tr>" &
+                            "<tr><td style='padding:4px 0;color:#777;vertical-align:top;'>Comentario</td><td style='padding:4px 0;'>" &
+                                If( IsBlank(gComentario), "&mdash;", gComentario ) & "</td></tr>" &
+                            "</table>" &
+
+                            "<table style='width:100%;font-size:13px;border-collapse:collapse;'>" &
+                            "<thead><tr style='background:#f4f6f8;'>" &
+                            "<th style='padding:8px 9px;text-align:left;'>Código</th>" &
+                            "<th style='padding:8px 9px;text-align:left;'>Descripción</th>" &
+                            "<th style='padding:8px 9px;text-align:right;'>Cant.</th>" &
+                            "<th style='padding:8px 9px;text-align:right;'>Unitario</th>" &
+                            "<th style='padding:8px 9px;text-align:right;'>Total</th>" &
+                            "</tr></thead>" &
+                            "<tbody>" & gMailFilas & "</tbody>" &
+                            "<tfoot>" &
+                            "<tr><td colspan='4' style='padding:10px 9px 2px;text-align:right;color:#777;'>Peso total</td>" &
+                            "<td style='padding:10px 9px 2px;text-align:right;font-weight:600;'>" & Text(gPesoTotal, "#,##0.00") & " kg</td></tr>" &
+                            "<tr><td colspan='4' style='padding:2px 9px 12px;text-align:right;font-weight:600;'>TOTAL Bs</td>" &
+                            "<td style='padding:2px 9px 12px;text-align:right;font-weight:700;font-size:15px;'>" & Text(gTotalPedido, "#,##0.00") & "</td></tr>" &
+                            "</tfoot>" &
+                            "</table>" &
+
+                            "</div></div>"
+                          );
+
+                          /* Destinatarios: casilla del rol almacen + el vendedor + Samuel.
+                             Si el vendedor despacha sus propios pedidos, el rol almacen
+                             no recibe el aviso. */
+                          Set( gMailAlmPedido, If( gVendedorDespacha, "", gMailRolAlmacen ) );
+
+                          Set( gMailPedidoDest,
+                            Trim(
+                              If( Not( IsBlank( gMailAlmPedido ) ), gMailAlmPedido & ";", "" ) &
+                              If( Not( IsBlank( gVendSel.VENDEDOR_EMAIL ) ),
+                                  gVendSel.VENDEDOR_EMAIL & ";", "" ) &
+                              If( gVendCod <> gUsrCod, User().Email & ";", "" ) &
+                              "samuel.jara@analytico.com.py"
+                            )
+                          );
+
+                          IfError(
+                            Office365Outlook.SendEmailV2(
+                              gMailPedidoDest,
+                              "Nuevo pedido " & gNroPedido & " — " & varCliente.CLIENTE_NOMBRE,
+                              gMailCuerpo
+                            ); false,
+                            Notify( "El pedido se guardó pero el correo NO se envió a: " & gMailPedidoDest &
+                                    ". Avisales a mano.", NotificationType.Warning )
+                          );
+
+                          Set( gPedidoGuardado, true );
+                          Clear( colPedido );
+
+                          /* refresco manual de la galeria del ultimo pedido:
+                             evita 6 lecturas a SharePoint durante el guardado */
+                          ClearCollect( colUltimoPed,
+                              With(
+                                  { ultimo:
+                                      First(
+                                          SortByColumns(
+                                              Filter( fact_PEDIDOS, CLIENTE_CODIGO = varCliente.CLIENTE_CODIGO ),
+                                              "PEDIDO_FECHA", SortOrder.Descending
+                                          )
+                                      ).PEDIDO_NUMERO
+                                  },
+                                  Filter( fact_PEDIDO_LINEAS, PEDIDO_NUMERO = ultimo )
+                              )
+                          );
+
+                          Notify( "Pedido guardado: " & CountRows( colPedLineasOk ) & " productos · " &
+                                  gCantAlmacenes & " almacén(es) · Bs " & Text( gTotalPedido, "#,##0.00" ),
+                                  NotificationType.Success )
+                        )
+                      )
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =gRojoDark
+                  RadiusBottomLeft: =14
+                  RadiusBottomRight: =14
+                  RadiusTopLeft: =14
+                  RadiusTopRight: =14
+                  Size: =15
+                  Text: ="Guardar pedido"
+                  Visible: =Not( gPedidoGuardado )
+                  Width: =Parent.Width - 32
+                  X: =16
+                  Y: =712
+            - cmpPantalla_2:
+                Control: CanvasComponent
+                ComponentName: cmpPantalla
+                Properties:
+                  Height: =80
+                  OnCobranza: =Navigate(PantallaCobranza_1)
+                  OnCompetencia: =Navigate(PantallaCompetencia_1)
+                  OnPedido: =Navigate(PantallaPedido_1)
+                  OnVisita: =Navigate(PantallaVisita_1)
+                  Visible: =gVeOtrasPantallas
+                  Width: =Parent.Width
+
