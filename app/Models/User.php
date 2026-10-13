@@ -60,6 +60,16 @@ class User extends Authenticatable
         ];
     }
 
+    public function pedidosVendidos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Pedido::class, 'vendedor_id');
+    }
+
+    public function sesiones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Sesion::class);
+    }
+
     // ---------------------------------------------------------------- rol
 
     public function esAdmin(): bool

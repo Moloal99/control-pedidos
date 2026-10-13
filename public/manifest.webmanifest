@@ -1,0 +1,14 @@
+{
+    "name": "Control de Pedidos · Plásticos Carmen",
+    "short_name": "Pedidos PC",
+    "description": "Visitas, pedidos, despachos y cobranzas de Plásticos Carmen",
+    "lang": "es",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f4f6fa",
+    "theme_color": "#063381",
+    "icons": [
+        { "src": "/img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+        { "src": "/img/favicon-32x32.png", "sizes": "32x32", "type": "image/png" }
+    ]
+}

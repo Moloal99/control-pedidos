@@ -33,7 +33,11 @@
         </div>
         <div class="relative mt-auto max-w-lg">
             <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
-                <span class="size-2 rounded-full bg-emerald-400 animate-latir"></span> Conectado a SharePoint de la empresa
+                @if ($demo)
+                    <span class="size-2 rounded-full bg-amber-400 animate-latir"></span> Modo demostración · datos de prueba
+                @else
+                    <span class="size-2 rounded-full bg-emerald-400 animate-latir"></span> Conectado a SharePoint de la empresa
+                @endif
             </div>
             <h1 class="text-4xl leading-tight font-bold">Control de Pedidos</h1>
             <p class="mt-3 text-lg text-white/75">Visitas, pedidos, despachos y cobranzas en un solo lugar, con trazabilidad de cada paso por usuario.</p>
