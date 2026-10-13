@@ -37,6 +37,11 @@ return [
 
     'mailers' => [
 
+        // Microsoft Graph como reportesbi@ (App\Correo\TransporteGraph)
+        'graph' => [
+            'transport' => 'graph',
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),

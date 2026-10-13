@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\SharePoint\EnEspejo;
 use App\Support\Almacenes;
+use App\Support\Texto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,7 +66,16 @@ class Producto extends Model
             return $consulta;
         }
 
-        return $consulta->where(fn ($q) => $q->where('descripcion', 'like', "%{$texto}%")->orWhere('codigo', 'like', "%{$texto}%"));
+        foreach (preg_split('/\s+/', Texto::plano($texto)) ?: [] as $palabra) {
+            $consulta->where('busqueda', 'like', "%{$palabra}%");
+        }
+
+        return $consulta;
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(fn (Producto $p) => $p->busqueda = Texto::plano($p->descripcion.' '.$p->codigo));
     }
 
     public function unidadNormalizada(): string

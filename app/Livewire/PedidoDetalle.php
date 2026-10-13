@@ -14,8 +14,9 @@ use App\Servicios\CrearNotaVenta;
 use App\Servicios\EditarPedido;
 use App\Servicios\EstadoPedido;
 use App\Servicios\NumerarProforma;
-use App\Support\Almacenes;
 use App\SharePoint\Espejo;
+use App\Support\Almacenes;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 
@@ -87,7 +88,7 @@ class PedidoDetalle extends Pantalla
         return $this->pedido->proformas()->with(['lineas', 'notas' => fn ($q) => $q->with('lineas')->withCount(['cobranzas as cobros_con_pago' => fn ($c) => $c->where('hubo_pago', true)])])->get();
     }
 
-    /** @return \Illuminate\Support\Collection<int, float> */
+    /** @return Collection<int, float> */
     #[Computed]
     public function despachado()
     {
@@ -161,6 +162,11 @@ class PedidoDetalle extends Pantalla
         $this->reset(['notaNumero', 'comprobante']);
         $this->resetErrorBag();
         $this->verDespacho = true;
+    }
+
+    public function updatedComprobante(): void
+    {
+        $this->resetErrorBag('comprobante');
     }
 
     public function todoPendiente(): void

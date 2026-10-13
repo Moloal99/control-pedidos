@@ -18,8 +18,8 @@ class SesionDetalle extends Pantalla
     public function render()
     {
         // Pantallas y acciones intercaladas en orden cronologico
-        $linea = $this->sesion->paginas->map(fn ($p) => ['tipo' => 'pagina', 'momento' => $p->entrada_at, 'item' => $p])
-            ->merge($this->sesion->asientos->map(fn ($a) => ['tipo' => 'accion', 'momento' => $a->created_at, 'item' => $a]))
+        $linea = $this->sesion->paginas->toBase()->map(fn ($p) => ['tipo' => 'pagina', 'momento' => $p->entrada_at, 'item' => $p])
+            ->merge($this->sesion->asientos->toBase()->map(fn ($a) => ['tipo' => 'accion', 'momento' => $a->created_at, 'item' => $a]))
             ->sortBy('momento')->values();
 
         return view('pantallas.admin.sesion', ['linea' => $linea])

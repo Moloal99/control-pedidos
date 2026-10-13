@@ -3,7 +3,9 @@
 namespace App\SharePoint;
 
 use Carbon\CarbonInterface;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -168,8 +170,8 @@ class GraphSharePoint implements SharePoint
         return Http::withToken($this->token->graph())
             ->acceptJson()
             ->timeout(30)
-            ->retry(2, 800, fn ($e) => $e instanceof \Illuminate\Http\Client\ConnectionException
-                || ($e instanceof \Illuminate\Http\Client\RequestException && in_array($e->response->status(), [429, 503, 504], true)), throw: false);
+            ->retry(2, 800, fn ($e) => $e instanceof ConnectionException
+                || ($e instanceof RequestException && in_array($e->response->status(), [429, 503, 504], true)), throw: false);
     }
 
     private function sitioId(): string

@@ -68,7 +68,7 @@
                     </div>
                 @else
                     <div class="relative" x-data="{ abierto: true }" @click.outside="abierto = false">
-                        <x-icono nombre="lupa" clase="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 suave" />
+                        <x-icono nombre="lupa" clase="pointer-events-none absolute top-[1.4rem] left-3.5 size-4 -translate-y-1/2 suave" />
                         <input type="search" wire:model.live.debounce.250ms="buscarCliente" @focus="abierto = true" placeholder="Busque por nombre o código del cliente…"
                                class="campo !pl-10 @error('cliente_id') campo-error @enderror" autocomplete="off" autofocus>
                         @if ($this->clientes->isNotEmpty())
@@ -182,7 +182,7 @@
                         @endif
                     </div>
                 @else
-                    <div class="flex items-center gap-2 text-sm suave">
+                    <div class="flex flex-wrap items-center gap-2 text-sm suave">
                         <x-icono nombre="usuario" clase="size-4" />
                         @if ($usuario->codigo)
                             Vendedor: <strong class="tinta">{{ $usuario->codigo }} — {{ $usuario->name }}</strong>

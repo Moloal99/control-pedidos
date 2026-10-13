@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('nombre')->index();
             $table->string('direccion', 500)->nullable();
             $table->string('telefono', 80)->nullable();
+            // nombre + codigo sin acentos ni mayusculas, para buscar «trebol» y hallar «TRÉBOL»
+            $table->string('busqueda', 400)->nullable()->index();
             $table->timestamps();
         });
 
@@ -38,6 +40,7 @@ return new class extends Migration
             $table->decimal('peso_por_bulto', 14, 4)->nullable();
             $table->decimal('peso_por_paquete', 14, 4)->nullable();
             $table->decimal('peso_por_jaba', 14, 4)->nullable();
+            $table->string('busqueda', 400)->nullable()->index();
             $table->timestamps();
         });
 

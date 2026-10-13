@@ -95,6 +95,11 @@ class Cobranza extends Pantalla
         $this->reset(['tipo_pago', 'monto', 'forma_pago', 'comprobante']);
     }
 
+    public function updatedComprobante(): void
+    {
+        $this->resetErrorBag('comprobante');
+    }
+
     public function updatedTipoPago(?string $valor): void
     {
         $this->monto = $valor === 'Completo' ? $this->disponible : null;

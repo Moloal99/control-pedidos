@@ -172,7 +172,7 @@
                                             <input type="number" step="any" value="{{ $item['cantidad'] }}" wire:change="actualizar({{ $item['indice'] }}, 'cantidad', $event.target.value)" class="campo !w-24 !px-2 !py-1.5 text-right numero">
                                             <span class="text-xs suave">{{ $item['producto']->unidadNormalizada() }} ×</span>
                                             <input type="number" step="any" value="{{ $item['precio'] }}" wire:change="actualizar({{ $item['indice'] }}, 'precio', $event.target.value)" class="campo !w-24 !px-2 !py-1.5 text-right numero">
-                                            <span class="ml-auto text-sm font-semibold numero">{{ Formato::bs($item['cantidad'] * $item['precio']) }}</span>
+                                            <span class="ml-auto text-sm font-semibold whitespace-nowrap numero">{{ Formato::bs($item['cantidad'] * $item['precio']) }}</span>
                                         </div>
                                     </div>
                                 @endforeach

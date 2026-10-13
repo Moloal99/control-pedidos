@@ -42,3 +42,5 @@ Artisan::command('trazabilidad:vencer', function () {
 Schedule::command('sharepoint:sincronizar')->everyMinute()->withoutOverlapping()->runInBackground();
 Schedule::command('sharepoint:sincronizar --completa')->dailyAt('03:30')->withoutOverlapping();
 Schedule::command('trazabilidad:vencer')->everyTenMinutes();
+// Envia los avisos en cola sin necesitar un servicio aparte en Windows
+Schedule::command('queue:work --stop-when-empty --tries=4 --max-time=50')->everyMinute()->withoutOverlapping();

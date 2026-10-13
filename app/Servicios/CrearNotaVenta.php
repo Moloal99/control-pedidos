@@ -12,6 +12,7 @@ use App\Models\User;
 use App\SharePoint\Espejo;
 use App\Support\Rastro;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 
 /**
  * Detalles › «Despachar»: crea la nota de venta con sus lineas y el
@@ -58,7 +59,7 @@ class CrearNotaVenta
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int|string, float>  $cantidades
+     * @param  Collection<int|string, float>  $cantidades
      * @param  array{nombre:string, ruta:string, contenido:string}  $archivo
      */
     private function guardar(User $usuario, Proforma $proforma, string $numero, $cantidades, array $archivo): NotaVenta

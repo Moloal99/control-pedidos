@@ -1,58 +1,85 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Control de Pedidos · Plásticos Carmen
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Reemplazo en Laravel de la Power App **«Tomador de pedidos – Extrusión»**: visitas, pedidos con una
+proforma por almacén, despachos con nota de venta, anulaciones, cobranzas con confirmación de caja y
+relevamiento de competencia. SharePoint sigue siendo la fuente de verdad; se suma la **trazabilidad por
+usuario** del portal central.plasticoscarmen.com.
 
-## About Laravel
+**Stack:** Laravel 13 · PHP 8.4 · Livewire 4 (con Alpine) · Tailwind CSS 4 · MariaDB (SQLite en desarrollo) ·
+Microsoft Graph (listas, correo e inicio de sesión) · PHPUnit 12.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Arranque rápido (modo demostración)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```powershell
+composer install
+npm install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate --seed      # almacenes + datos de demostración de 45 días
+npm run build
+php artisan serve --port=8020
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Entre a <http://localhost:8020>: en modo demostración la pantalla de acceso permite elegir un usuario de
+cada rol (administrador, vendedor, vendedor que despacha, supervisor, almacén, cobranzas, cobrador).
+Nada sale del equipo: no hay SharePoint ni correo real (los correos se escriben en `storage/logs`).
 
-## Contributing
+```powershell
+php artisan test                # 39 pruebas: flujo comercial, permisos, espejo SharePoint, correos
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Módulos
 
-## Code of Conduct
+| Pantalla | Quién | Qué hace |
+|---|---|---|
+| Inicio | Todos | Lo pendiente de cada rol, indicadores, tendencia y actividad |
+| Visita | Vendedor, supervisor, admin | Registra visita o llamada; «cargar a nombre de» para supervisores |
+| Pedido | Vendedor, supervisor, admin | Carrito agrupado por almacén, repetir último pedido, último precio |
+| Cobranza | Vendedor, cobrador, admin | Cobro con comprobante (foto desde el celular) o gestión sin pago |
+| Competencia | Vendedor, admin | Precios de la competencia por cliente |
+| Pedidos | Según rol | Bandeja por estado; detalle con proformas, despacho, notas, anulación, edición e historial |
+| Cobranzas por confirmar | Cobranzas, admin | Revisión del comprobante, confirmación con N° del ERP y corrección |
+| Ficha de cliente | Todos | Saldo, vencidos, productos habituales, visitas, competencia |
+| Administración | Admin | Trazabilidad por usuario, usuarios, configuración de correos y almacenes, estado de Microsoft 365 |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Los permisos replican exactamente las capacidades de la Power App (`App\Models\User`):
+`veTodosLosPedidos`, `puedeDespachar` (almacén, admin o vendedor con `VENDEDOR_DESPACHA` sobre lo suyo),
+`puedeEditar`, `puedeConfirmarCobranzas`, etc.
 
-## Security Vulnerabilities
+## Arquitectura
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+app/
+├─ SharePoint/      Contrato, conector Graph, modo demo, unidad de trabajo con compensación, sincronizador
+├─ Servicios/       Una clase por operación de negocio (GuardarPedido, CrearNotaVenta, ConfirmarCobranza…)
+├─ Correo/          Los seis avisos, transporte Graph y bandeja con reintentos
+├─ Livewire/        Pantallas
+├─ Support/         Rastro (trazabilidad), Trazas (métricas), Almacenes, VentaEnCurso, Formato
+└─ Models/          Espejo local de las 11 listas + trazabilidad
+```
 
-## License
+- **Escritura:** cada operación corre en `Espejo::operacion()`: base local en una transacción y SharePoint
+  elemento por elemento; si algo falla, se revierte la base y se compensa lo escrito en SharePoint.
+- **Lectura:** las pantallas leen la base local (rápido, sin límites de delegación). El programador trae los
+  cambios de SharePoint cada minuto, así conviven la Power App y Power BI durante la transición.
+- **Columnas:** se nombran como en la Power App; el conector las traduce a nombres internos leyendo la lista.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Documentación
+
+| Archivo | Contenido |
+|---|---|
+| `docs/01-ESPECIFICACION-POWERAPP.md` | Relevamiento completo de la Power App (roles, listas, flujos, correos, 35 defectos) |
+| `docs/02-CAMBIOS-RESPECTO-A-LA-POWER-APP.md` | Qué mejoró y qué decisiones debe confirmar la empresa |
+| `docs/03-GUIA-ENTRA-ID.md` | Registrar la aplicación en Entra ID y conectar SharePoint y el correo |
+| `docs/04-DESPLIEGUE.md` | Servidor Windows con IIS, MariaDB, tarea programada y tarjeta en el portal central |
+| `docs/powerapps/` | Código fuente exportado de la Power App (YAML de cada pantalla) |
+
+## Comandos
+
+| Comando | Para qué |
+|---|---|
+| `php artisan sharepoint:sincronizar` | Trae los cambios recientes de las listas |
+| `php artisan sharepoint:sincronizar --completa` | Relee todo y detecta borrados |
+| `php artisan sharepoint:sincronizar --lista=fact_PEDIDOS` | Una sola lista |
+| `php artisan trazabilidad:vencer` | Cierra sesiones inactivas |
+| `php artisan schedule:run` | Lo ejecuta la tarea programada cada minuto |

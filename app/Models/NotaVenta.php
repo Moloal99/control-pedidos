@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EstadoCobranza;
 use App\Enums\EstadoPago;
 use App\Enums\FormaPago;
 use App\SharePoint\EnEspejo;
@@ -122,7 +123,7 @@ class NotaVenta extends Model
         return (float) Cobranza::query()
             ->where('nota_id', $this->getKey())
             ->where('hubo_pago', true)
-            ->where('estado', \App\Enums\EstadoCobranza::Pendiente->value)
+            ->where('estado', EstadoCobranza::Pendiente->value)
             ->sum('monto');
     }
 

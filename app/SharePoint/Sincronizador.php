@@ -6,7 +6,10 @@ use App\Enums\EstadoCobranza;
 use App\Enums\EstadoDespacho;
 use App\Enums\EstadoPago;
 use App\Enums\EstadoProforma;
+use App\Enums\MotivoVisita;
 use App\Enums\Rol;
+use App\Enums\TipoCompetencia;
+use App\Enums\TipoContacto;
 use App\Models\Cliente;
 use App\Models\Cobranza;
 use App\Models\NotaLinea;
@@ -136,7 +139,8 @@ class Sincronizador
         $modelo->forceFill($atributos + ['sp_id' => $spId]);
 
         if ($modelo->isDirty()) {
-            $modelo->saveQuietly();
+            // save (no saveQuietly): clientes y productos recalculan su columna de busqueda
+            $modelo->save();
         }
 
         return true;
@@ -187,8 +191,8 @@ class Sincronizador
                 }
                 $a['titulo'] = $a['titulo'] ?? (($a['cliente_nombre'] ?? 'Visita').' - '.$a['fecha']->format('d/m/Y H:i'));
                 $a['vendedor_id'] ??= $usuarioId($a['vendedor_codigo'] ?? null);
-                $a['motivo'] ??= \App\Enums\MotivoVisita::Rutina;
-                $a['tipo_contacto'] ??= \App\Enums\TipoContacto::Visita;
+                $a['motivo'] ??= MotivoVisita::Rutina;
+                $a['tipo_contacto'] ??= TipoContacto::Visita;
                 break;
 
             case Pedido::class:
@@ -296,7 +300,7 @@ class Sincronizador
                 $a['titulo'] ??= 'REL';
                 $a['vendedor_id'] ??= $usuarioId($a['vendedor_codigo'] ?? null);
                 $a['competidor'] ??= '';
-                $a['tipo'] ??= \App\Enums\TipoCompetencia::Otro;
+                $a['tipo'] ??= TipoCompetencia::Otro;
                 $a['descripcion'] ??= '';
                 $a['precio'] ??= 0;
                 $a['cantidad'] ??= 0;

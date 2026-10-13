@@ -16,20 +16,20 @@
 
         <div class="tarjeta overflow-hidden">
             <div class="flex items-center justify-between border-b px-5 py-3.5 linea">
-                <h2 class="font-semibold">Notas de venta con saldo <span class="suave font-normal">· {{ $this->notas->count() }}</span></h2>
-                <span class="text-xs suave">{{ $usuario->veTodasLasNotas() ? 'Todos los vendedores' : 'Solo sus notas' }}</span>
+                <h2 class="font-semibold">Notas con saldo <span class="suave font-normal">· {{ $this->notas->count() }}</span></h2>
+                <span class="text-xs whitespace-nowrap suave">{{ $usuario->veTodasLasNotas() ? 'Todos los vendedores' : 'Solo sus notas' }}</span>
             </div>
             <div class="divide-y linea">
                 @forelse ($this->notas as $n)
                     @php($pendiente = (float) $n->por_confirmar)
-                    <button type="button" wire:click="elegir({{ $n->id }})" wire:key="n-{{ $n->id }}" @class(['flex w-full items-center gap-4 px-5 py-3.5 text-left transition linea hover:bg-[var(--papel-2)]', 'bg-marca-50/70 dark:bg-marca-500/10' => $nota_id === $n->id])>
-                        <span @class(['grid size-10 shrink-0 place-items-center rounded-xl', 'bg-rojo-50 text-rojo-600 dark:bg-rojo-500/15' => $n->estaVencida(), 'fondo-papel-2 suave' => ! $n->estaVencida()])>
+                    <button type="button" wire:click="elegir({{ $n->id }})" wire:key="n-{{ $n->id }}" @class(['flex w-full items-center gap-3 px-4 py-3.5 text-left transition sm:gap-4 sm:px-5 linea hover:bg-[var(--papel-2)]', 'bg-marca-50/70 dark:bg-marca-500/10' => $nota_id === $n->id])>
+                        <span @class(['hidden size-10 shrink-0 place-items-center rounded-xl sm:grid', 'bg-rojo-50 text-rojo-600 dark:bg-rojo-500/15' => $n->estaVencida(), 'fondo-papel-2 suave' => ! $n->estaVencida()])>
                             <x-icono nombre="documento" clase="size-5" />
                         </span>
                         <span class="min-w-0 flex-1">
-                            <span class="flex items-center gap-2">
-                                <span class="font-semibold">Nota {{ $n->numero }}</span>
-                                <span class="text-xs suave">{{ $n->fecha->format('d/m') }}</span>
+                            <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                <span class="font-semibold whitespace-nowrap">Nota {{ $n->numero }}</span>
+                                <span class="text-xs whitespace-nowrap suave">{{ $n->fecha->format('d/m') }}</span>
                                 @if ($n->estaVencida()) <span class="pastilla tono-rojo">Vencida</span> @endif
                             </span>
                             <span class="block truncate text-sm">{{ $n->cliente_nombre }}</span>
@@ -37,7 +37,7 @@
                         </span>
                         <span class="shrink-0 text-right">
                             <span class="block text-xs suave numero">{{ Formato::bs($n->total) }}</span>
-                            <span @class(['block font-semibold numero', 'text-amber-600' => $pendiente > 0])>
+                            <span @class(['block font-semibold whitespace-nowrap numero', 'text-amber-600' => $pendiente > 0])>
                                 {{ Formato::bs(max(0, $n->saldo_pendiente - $pendiente)) }} @if ($pendiente > 0) <x-icono nombre="reloj" clase="inline size-3.5" /> @endif
                             </span>
                             <span class="block text-[11px] suave">disponible</span>
@@ -85,9 +85,9 @@
                         <button wire:click="cerrar" class="rounded-lg p-1.5 text-white/80 hover:bg-white/10"><x-icono nombre="x" /></button>
                     </div>
                     <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-                        <div class="rounded-xl bg-white/10 p-2"><div class="text-[11px] text-white/70">Total</div><div class="font-semibold numero">{{ Formato::bs($n->total) }}</div></div>
-                        <div class="rounded-xl bg-white/10 p-2"><div class="text-[11px] text-white/70">Saldo</div><div class="font-semibold numero">{{ Formato::bs($n->saldo_pendiente) }}</div></div>
-                        <div class="rounded-xl bg-white/20 p-2"><div class="text-[11px] text-white/80">Disponible</div><div class="font-bold numero">{{ Formato::bs($this->disponible) }}</div></div>
+                        <div class="rounded-xl bg-white/10 p-2"><div class="text-[11px] text-white/70">Total</div><div class="text-sm font-semibold whitespace-nowrap numero sm:text-base">{{ Formato::bs($n->total) }}</div></div>
+                        <div class="rounded-xl bg-white/10 p-2"><div class="text-[11px] text-white/70">Saldo</div><div class="text-sm font-semibold whitespace-nowrap numero sm:text-base">{{ Formato::bs($n->saldo_pendiente) }}</div></div>
+                        <div class="rounded-xl bg-white/20 p-2"><div class="text-[11px] text-white/80">Disponible</div><div class="text-sm font-bold whitespace-nowrap numero sm:text-base">{{ Formato::bs($this->disponible) }}</div></div>
                     </div>
                     @if ($n->fecha_vencimiento)
                         <div class="mt-3 text-xs text-white/80">Vence el {{ $n->fecha_vencimiento->format('d/m/Y') }} · {{ $n->forma_pago?->value }}</div>

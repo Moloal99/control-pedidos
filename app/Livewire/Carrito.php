@@ -2,8 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\Almacen;
 use App\Models\Pedido;
+use App\Models\PedidoLinea;
 use App\Models\Producto;
+use App\Models\Visita;
 use App\Servicios\GuardarPedido;
 use App\Support\Almacenes;
 use App\Support\Formato;
@@ -27,7 +30,7 @@ class Carrito extends Pantalla
     public $precio = null;
 
     #[Computed]
-    public function visita(): ?\App\Models\Visita
+    public function visita(): ?Visita
     {
         return VentaEnCurso::visita();
     }
@@ -56,7 +59,7 @@ class Carrito extends Pantalla
             return null;
         }
 
-        $precio = \App\Models\PedidoLinea::query()
+        $precio = PedidoLinea::query()
             ->where('producto_codigo', $this->producto->codigo)
             ->whereHas('pedido', fn ($q) => $q->where('cliente_id', $this->visita->cliente_id))
             ->latest('id')->value('precio_unitario');
@@ -77,7 +80,7 @@ class Carrito extends Pantalla
     /**
      * Carrito agrupado por almacen (asi se ve como van a quedar las proformas).
      *
-     * @return array<string, array{almacen:\App\Models\Almacen, items:list<array<string,mixed>>, total:float, kg:float}>
+     * @return array<string, array{almacen:Almacen, items:list<array<string,mixed>>, total:float, kg:float}>
      */
     #[Computed]
     public function grupos(): array

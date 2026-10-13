@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Pagina;
+use App\Models\Sesion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -56,7 +58,7 @@ class PantallasYPermisosTest extends TestCase
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('matriz')]
+    #[DataProvider('matriz')]
     public function test_matriz_de_acceso_por_rol(string $rol, array $esperado): void
     {
         $this->pedido();
@@ -108,6 +110,10 @@ class PantallasYPermisosTest extends TestCase
 
         $respuesta->assertOk();
         $this->assertStringContainsString('spreadsheetml', (string) $respuesta->headers->get('Content-Type'));
+
+        $sesion = Sesion::query()->firstOrFail();
+        $this->actingAs($this->u['admin'])->get(route('admin.trazabilidad.sesion', $sesion))->assertOk()->assertSee('Recorrido');
+        $this->actingAs($this->u['vendedor'])->get(route('admin.trazabilidad.sesion', $sesion))->assertForbidden();
     }
 
     public function test_comprobante_protegido(): void

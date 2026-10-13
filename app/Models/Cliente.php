@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\SharePoint\EnEspejo;
+use App\Support\Texto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,11 @@ class Cliente extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(fn (Cliente $c) => $c->busqueda = Texto::plano($c->nombre.' '.$c->codigo));
+    }
+
     public function pedidos(): HasMany
     {
         return $this->hasMany(Pedido::class);
@@ -43,7 +49,12 @@ class Cliente extends Model
             return $consulta;
         }
 
-        return $consulta->where(fn ($q) => $q->where('nombre', 'like', "%{$texto}%")->orWhere('codigo', 'like', "{$texto}%"));
+        // Cada palabra debe aparecer, en cualquier orden y sin importar acentos
+        foreach (preg_split('/\s+/', Texto::plano($texto)) ?: [] as $palabra) {
+            $consulta->where('busqueda', 'like', "%{$palabra}%");
+        }
+
+        return $consulta;
     }
 
     /** En SharePoint «0» significa vacio. */

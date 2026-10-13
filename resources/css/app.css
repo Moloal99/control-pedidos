@@ -72,6 +72,9 @@
         color: var(--texto);
     }
     [x-cloak] { display: none !important; }
+    /* Los hijos de grilla y flex pueden encogerse: evita el desborde horizontal en el celular */
+    .grid > *, .flex > * { min-width: 0; }
+    html, body { overflow-x: clip; }
     ::selection { background: var(--color-marca-200); color: var(--color-marca-900); }
 }
 

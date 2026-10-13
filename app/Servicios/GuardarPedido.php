@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Visita;
 use App\SharePoint\Espejo;
 use App\Support\Rastro;
+use Carbon\CarbonInterface;
 
 /**
  * Pantalla Pedido › «Guardar pedido».
@@ -176,7 +177,7 @@ class GuardarPedido
     }
 
     /** PED-{codigo}-{yyyymmdd-hhmmss}, unico aunque dos se guarden en el mismo segundo. */
-    private function numero(string $codigo, \Carbon\CarbonInterface $momento): string
+    private function numero(string $codigo, CarbonInterface $momento): string
     {
         $base = 'PED-'.$codigo.'-'.$momento->format('Ymd-His');
         $numero = $base;
