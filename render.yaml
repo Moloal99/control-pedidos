@@ -1,13 +1,10 @@
 # Blueprint de Render: Dashboard › New › Blueprint › elegir este repositorio.
-# Crea la base PostgreSQL y el servicio web. Las claves se generan solas.
-databases:
-  - name: control-pedidos-db
-    plan: free
-    region: virginia
-    databaseName: control_pedidos
-    user: control_pedidos
-    ipAllowList: []
-
+#
+# Base de datos: SQLite dentro del contenedor (Render permite una sola base
+# PostgreSQL gratuita por cuenta y ya esta en uso). En el plan gratuito los
+# datos se reinician cuando el servicio se reinicia; la demostracion se vuelve
+# a cargar sola. Para datos permanentes: crear una PostgreSQL de pago y poner
+# DB_CONNECTION=pgsql y DB_URL (ver docs/04-DESPLIEGUE.md, seccion Render).
 services:
   - type: web
     name: control-pedidos
@@ -33,11 +30,9 @@ services:
       - key: APP_TIMEZONE
         value: America/La_Paz
       - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_URL
-        fromDatabase:
-          name: control-pedidos-db
-          property: connectionString
+        value: sqlite
+      - key: DB_DATABASE
+        value: /app/database/database.sqlite
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_LIFETIME
@@ -63,11 +58,5 @@ services:
         value: Plásticos Carmen · Pedidos
       - key: MS_TENANT_ID
         value: 27250769-1586-414b-8402-5536efdbfa8a
-      - key: MS_CLIENT_ID
-        sync: false
-      - key: MS_CLIENT_SECRET
-        sync: false
       - key: SP_HOST
         value: plasticoscarmenbo.sharepoint.com
-      - key: SP_SITIO
-        sync: false

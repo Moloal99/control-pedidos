@@ -120,3 +120,16 @@ php artisan up
   `php artisan sharepoint:sincronizar --completa` reconstruye la operación. Lo que **solo** vive aquí es la
   trazabilidad (sesiones, pantallas, bitácora), la configuración de correos y almacenes y la bandeja de correos.
 - Carpeta `storage\app\private\comprobantes` (copia local de los comprobantes; el original queda en SharePoint).
+
+## 9. Render (demostración en línea)
+
+`render.yaml` crea el servicio web desde este repositorio (Dashboard › Blueprints). Usa SQLite dentro del
+contenedor porque Render permite una sola PostgreSQL gratuita por cuenta. En el plan gratuito el servicio
+se duerme tras 15 minutos sin uso y, al reiniciarse, la base vuelve a los datos de demostración.
+
+- **Clave de la demostración:** Render › servicio `control-pedidos` › Environment › `PEDIDOS_DEMO_CLAVE`.
+- **Datos permanentes:** cree una PostgreSQL de pago en Render y cambie en Environment
+  `DB_CONNECTION=pgsql` y `DB_URL=<Internal Database URL>` (y quite `DB_DATABASE`).
+- **SharePoint y Microsoft 365:** agregue las variables `MS_*`, `SP_SITIO`, `PEDIDOS_MODO=sharepoint`,
+  `MAIL_MAILER=graph` y `QUEUE_CONNECTION=database` (docs/03-GUIA-ENTRA-ID.md) y la URI de redirección
+  `https://<servicio>.onrender.com/auth/microsoft/callback` en Entra ID.

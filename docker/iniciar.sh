@@ -15,6 +15,12 @@ if [ -z "$APP_KEY" ] && [ -n "$APP_SECRETO" ]; then
     export APP_KEY
 fi
 
+# SQLite: el archivo se crea si no existe
+if [ "$DB_CONNECTION" = "sqlite" ] && [ -n "$DB_DATABASE" ]; then
+    mkdir -p "$(dirname "$DB_DATABASE")"
+    touch "$DB_DATABASE"
+fi
+
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
