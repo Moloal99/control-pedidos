@@ -84,6 +84,14 @@
                     <div class="flex items-center gap-2 text-sm font-semibold text-amber-700">
                         <x-icono nombre="chispa" clase="size-4" /> Modo demostración
                     </div>
+                    @if ($pideClave)
+                    <p class="mt-1 text-xs suave">Escriba la clave de demostración para elegir un usuario de prueba.</p>
+                    <form method="POST" action="{{ route('login.demo.clave') }}" class="mt-3 flex gap-2">
+                        @csrf
+                        <input type="password" name="clave" required autocomplete="off" class="campo flex-1" placeholder="Clave de demostración">
+                        <button class="btn-primario btn">Entrar</button>
+                    </form>
+                    @else
                     <p class="mt-1 text-xs suave">Elija un usuario para recorrer el sistema con sus permisos. Este acceso no existe en producción.</p>
                     <form method="POST" action="{{ route('login.demo') }}" class="mt-3 space-y-2">
                         @csrf
@@ -104,6 +112,7 @@
                             @endforeach
                         </div>
                     </form>
+                    @endif
                 </div>
             @endif
 

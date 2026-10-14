@@ -7,6 +7,7 @@ use App\Models\NotaVenta;
 use App\Servicios\Comprobantes;
 use App\Servicios\RegistrarCobranza;
 use App\Support\Formato;
+use App\Support\Texto;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -47,9 +48,9 @@ class Cobranza extends Pantalla
         return NotaVenta::query()
             ->cobrables($this->usuario())
             ->when(trim($this->buscar) !== '', fn ($q) => $q->where(fn ($w) => $w
-                ->where('numero', 'like', '%'.trim($this->buscar).'%')
-                ->orWhere('cliente_nombre', 'like', '%'.trim($this->buscar).'%')
-                ->orWhere('vendedor_nombre', 'like', '%'.trim($this->buscar).'%')))
+                ->where('numero', Texto::like(), '%'.trim($this->buscar).'%')
+                ->orWhere('cliente_nombre', Texto::like(), '%'.trim($this->buscar).'%')
+                ->orWhere('vendedor_nombre', Texto::like(), '%'.trim($this->buscar).'%')))
             ->when($this->soloVencidas, fn ($q) => $q->whereNotNull('fecha_vencimiento')->where('fecha_vencimiento', '<', now()))
             ->withSum(['cobranzas as por_confirmar' => fn ($q) => $q->where('hubo_pago', true)->where('estado', 'Pendiente de confirmación')], 'monto')
             ->orderByRaw('CASE WHEN fecha_vencimiento < ? THEN 0 ELSE 1 END', [now()])

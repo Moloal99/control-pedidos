@@ -14,6 +14,9 @@ return [
     // sharepoint: SharePoint es la fuente de verdad (Microsoft Graph).
     'modo' => env('PEDIDOS_MODO', 'demo'),
 
+    // Clave para entrar a la demostracion publicada (Render). Vacia = sin clave (solo equipo local).
+    'demo_clave' => env('PEDIDOS_DEMO_CLAVE'),
+
     // Enlace de regreso al portal central
     'central_url' => env('CENTRAL_URL', 'https://central.plasticoscarmen.com'),
 

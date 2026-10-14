@@ -36,6 +36,30 @@ class PantallasYPermisosTest extends TestCase
         $this->assertAuthenticatedAs($this->u['vendedor']);
     }
 
+    public function test_la_demo_publicada_pide_clave(): void
+    {
+        config(['pedidos.demo_clave' => 'clave-secreta']);
+
+        $this->get(route('login'))->assertOk()->assertSee('Clave de demostración')->assertDontSee($this->u['vendedor']->email);
+        $this->post(route('login.demo'), ['usuario' => $this->u['vendedor']->id])->assertNotFound();
+        $this->post(route('login.demo.clave'), ['clave' => 'otra'])->assertRedirect();
+        $this->assertGuest();
+
+        $this->post(route('login.demo.clave'), ['clave' => 'clave-secreta'])->assertRedirect(route('login'));
+        $this->get(route('login'))->assertSee($this->u['vendedor']->email);
+        $this->post(route('login.demo'), ['usuario' => $this->u['vendedor']->id])->assertRedirect(route('inicio'));
+        $this->assertAuthenticatedAs($this->u['vendedor']);
+    }
+
+    public function test_en_produccion_sin_clave_no_hay_demo(): void
+    {
+        $this->app['env'] = 'production';
+        config(['pedidos.demo_clave' => null]);
+
+        $this->get(route('login'))->assertOk()->assertDontSee('Modo demostración');
+        $this->assertFalse(\App\Http\Controllers\Auth\SesionController::demoHabilitado());
+    }
+
     public function test_un_usuario_suspendido_no_entra(): void
     {
         $this->u['otro']->update(['activo' => false]);

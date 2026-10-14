@@ -7,6 +7,7 @@ use App\Enums\EstadoPago;
 use App\Enums\FormaPago;
 use App\Enums\TipoContacto;
 use App\SharePoint\EnEspejo;
+use App\Support\Texto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -137,10 +138,10 @@ class Pedido extends Model
         }
 
         return $consulta->where(fn ($q) => $q
-            ->where('cliente_nombre', 'like', "%{$texto}%")
-            ->orWhere('vendedor_nombre', 'like', "%{$texto}%")
-            ->orWhere('numero', 'like', "%{$texto}%")
-            ->orWhere('cliente_codigo', 'like', "{$texto}%"));
+            ->where('cliente_nombre', Texto::like(), "%{$texto}%")
+            ->orWhere('vendedor_nombre', Texto::like(), "%{$texto}%")
+            ->orWhere('numero', Texto::like(), "%{$texto}%")
+            ->orWhere('cliente_codigo', Texto::like(), "{$texto}%"));
     }
 
     public function fueModificado(): bool

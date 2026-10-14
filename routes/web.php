@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/acceso', [SesionController::class, 'mostrar'])->name('login');
     Route::post('/acceso/demo', [SesionController::class, 'demo'])->name('login.demo');
+    Route::post('/acceso/demo/clave', [SesionController::class, 'clave'])->middleware('throttle:5,1')->name('login.demo.clave');
     Route::get('/auth/microsoft', [MicrosoftController::class, 'redirigir'])->name('auth.microsoft');
     Route::get('/auth/microsoft/callback', [MicrosoftController::class, 'volver'])->name('auth.microsoft.volver');
 });

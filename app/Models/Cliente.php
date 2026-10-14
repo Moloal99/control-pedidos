@@ -51,7 +51,7 @@ class Cliente extends Model
 
         // Cada palabra debe aparecer, en cualquier orden y sin importar acentos
         foreach (preg_split('/\s+/', Texto::plano($texto)) ?: [] as $palabra) {
-            $consulta->where('busqueda', 'like', "%{$palabra}%");
+            $consulta->where('busqueda', Texto::like(), "%{$palabra}%");
         }
 
         return $consulta;

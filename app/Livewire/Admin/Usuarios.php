@@ -6,6 +6,7 @@ use App\Enums\AccionBitacora;
 use App\Livewire\Pantalla;
 use App\Models\User;
 use App\Support\Rastro;
+use App\Support\Texto;
 use Livewire\Attributes\Title;
 
 /**
@@ -36,7 +37,7 @@ class Usuarios extends Pantalla
     public function render()
     {
         $usuarios = User::query()
-            ->when(trim($this->buscar) !== '', fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%'.$this->buscar.'%')->orWhere('email', 'like', '%'.$this->buscar.'%')->orWhere('codigo', 'like', $this->buscar.'%')))
+            ->when(trim($this->buscar) !== '', fn ($q) => $q->where(fn ($w) => $w->where('name', Texto::like(), '%'.$this->buscar.'%')->orWhere('email', Texto::like(), '%'.$this->buscar.'%')->orWhere('codigo', Texto::like(), $this->buscar.'%')))
             ->withCount(['pedidosVendidos', 'sesiones'])
             ->orderBy('rol')->orderBy('name')->get();
 

@@ -6,6 +6,7 @@ use App\Enums\EstadoCobranza;
 use App\Enums\FormaPagoCobranza;
 use App\Enums\TipoPagoCobranza;
 use App\SharePoint\EnEspejo;
+use App\Support\Texto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -122,9 +123,9 @@ class Cobranza extends Model
         }
 
         return $consulta->where(fn ($q) => $q
-            ->where('nota_numero', 'like', "%{$texto}%")
-            ->orWhere('cliente_nombre', 'like', "%{$texto}%")
-            ->orWhere('vendedor_nombre', 'like', "%{$texto}%")
-            ->orWhere('numero', 'like', "%{$texto}%"));
+            ->where('nota_numero', Texto::like(), "%{$texto}%")
+            ->orWhere('cliente_nombre', Texto::like(), "%{$texto}%")
+            ->orWhere('vendedor_nombre', Texto::like(), "%{$texto}%")
+            ->orWhere('numero', Texto::like(), "%{$texto}%"));
     }
 }

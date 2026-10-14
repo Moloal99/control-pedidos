@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use App\Models\Producto;
 use App\Models\Relevamiento;
 use App\Servicios\GuardarRelevamiento;
+use App\Support\Texto;
 use App\Support\VentaEnCurso;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -86,7 +87,7 @@ class Competencia extends Pantalla
             return collect();
         }
 
-        return Relevamiento::query()->where('descripcion', 'like', '%'.trim($this->descripcion).'%')->latest('fecha')->limit(5)->get();
+        return Relevamiento::query()->where('descripcion', Texto::like(), '%'.trim($this->descripcion).'%')->latest('fecha')->limit(5)->get();
     }
 
     public function elegirCliente(int $id): void

@@ -35,7 +35,7 @@ class EnviarAviso implements ShouldQueue
         $this->correo->increment('intentos');
 
         /** @var Mailable $mailable */
-        $mailable = unserialize((string) $this->correo->carga);
+        $mailable = unserialize(base64_decode((string) $this->correo->carga));
 
         Mail::send($mailable);
 

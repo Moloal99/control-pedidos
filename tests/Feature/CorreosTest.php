@@ -81,7 +81,7 @@ class CorreosTest extends TestCase
         $pedido = $this->pedido();
 
         $correo = Correo::query()->where('evento', 'nuevo_pedido')->firstOrFail();
-        $aviso = unserialize($correo->carga);
+        $aviso = unserialize(base64_decode($correo->carga));
         $html = $aviso->render();
 
         $this->assertStringContainsString($pedido->numero, $html);

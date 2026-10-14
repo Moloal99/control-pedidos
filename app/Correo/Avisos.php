@@ -260,7 +260,7 @@ class Avisos
                 'destinatarios' => implode('; ', $para),
                 'referencia' => $referencia,
                 'estado' => 'en_cola',
-                'carga' => serialize($aviso),
+                'carga' => base64_encode(serialize($aviso)),
                 'user_id' => $usuario->getKey(),
             ]);
 

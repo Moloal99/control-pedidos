@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Almacen;
-use App\Support\Almacenes;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,11 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (config('pedidos.almacenes') as $orden => $almacen) {
-            Almacen::query()->updateOrCreate(['codigo' => $almacen['codigo']], $almacen + ['orden' => $orden]);
-        }
-
-        Almacenes::olvidar();
+        $this->call(AlmacenesSeeder::class);
 
         if (config('pedidos.modo') === 'demo') {
             $this->call(DemoSeeder::class);

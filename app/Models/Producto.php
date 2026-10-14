@@ -67,7 +67,7 @@ class Producto extends Model
         }
 
         foreach (preg_split('/\s+/', Texto::plano($texto)) ?: [] as $palabra) {
-            $consulta->where('busqueda', 'like', "%{$palabra}%");
+            $consulta->where('busqueda', Texto::like(), "%{$palabra}%");
         }
 
         return $consulta;

@@ -1,0 +1,73 @@
+# Blueprint de Render: Dashboard › New › Blueprint › elegir este repositorio.
+# Crea la base PostgreSQL y el servicio web. Las claves se generan solas.
+databases:
+  - name: control-pedidos-db
+    plan: free
+    region: virginia
+    databaseName: control_pedidos
+    user: control_pedidos
+    ipAllowList: []
+
+services:
+  - type: web
+    name: control-pedidos
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Control de Pedidos
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_SECRETO
+        generateValue: true
+      - key: APP_LOCALE
+        value: es
+      - key: APP_FALLBACK_LOCALE
+        value: es
+      - key: APP_TIMEZONE
+        value: America/La_Paz
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: control-pedidos-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: "480"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: LOG_CHANNEL
+        value: stderr
+      # demo: datos de prueba con acceso por clave. sharepoint: ver docs/03-GUIA-ENTRA-ID.md
+      - key: PEDIDOS_MODO
+        value: demo
+      - key: PEDIDOS_DEMO_CLAVE
+        generateValue: true
+      - key: CENTRAL_URL
+        value: https://central.plasticoscarmen.com
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: reportesbi@plasticoscarmen.com
+      - key: MAIL_FROM_NAME
+        value: Plásticos Carmen · Pedidos
+      - key: MS_TENANT_ID
+        value: 27250769-1586-414b-8402-5536efdbfa8a
+      - key: MS_CLIENT_ID
+        sync: false
+      - key: MS_CLIENT_SECRET
+        sync: false
+      - key: SP_HOST
+        value: plasticoscarmenbo.sharepoint.com
+      - key: SP_SITIO
+        sync: false

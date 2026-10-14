@@ -60,9 +60,9 @@ class Trazas
             ->when($f['usuario'], fn ($q, $id) => $q->where('user_id', $id))
             ->when($f['accion'], fn ($q, $a) => $q->where('accion', $a))
             ->when($f['texto'] ?? null, fn ($q, $t) => $q->where(fn ($w) => $w
-                ->where('descripcion', 'like', "%{$t}%")
-                ->orWhere('referencia', 'like', "%{$t}%")
-                ->orWhere('usuario_nombre', 'like', "%{$t}%")));
+                ->where('descripcion', Texto::like(), "%{$t}%")
+                ->orWhere('referencia', Texto::like(), "%{$t}%")
+                ->orWhere('usuario_nombre', Texto::like(), "%{$t}%")));
     }
 
     /**

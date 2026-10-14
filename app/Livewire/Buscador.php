@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use App\Models\NotaVenta;
 use App\Models\Pedido;
 use App\Models\Producto;
+use App\Support\Texto;
 use Livewire\Attributes\Computed;
 
 /**
@@ -37,7 +38,7 @@ class Buscador extends Pantalla
             ->map(fn ($c) => ['icono' => 'tienda', 'titulo' => $c->nombre, 'detalle' => 'Código '.$c->codigo, 'url' => route('clientes.ver', $c)])->all();
 
         if ($u->puedeCobrar() || $u->veTodosLosPedidos()) {
-            $grupos['Notas de venta'] = NotaVenta::query()->where('numero', 'like', "%{$t}%")
+            $grupos['Notas de venta'] = NotaVenta::query()->where('numero', Texto::like(), "%{$t}%")
                 ->when(! $u->veTodasLasNotas() && ! $u->veTodosLosPedidos(), fn ($q) => $q->where('vendedor_codigo', $u->codigo))
                 ->limit(5)->get()
                 ->map(fn ($n) => ['icono' => 'documento', 'titulo' => 'Nota '.$n->numero.' · '.$n->cliente_nombre, 'detalle' => ($n->anulada ? 'Anulada' : 'Saldo Bs '.number_format((float) $n->saldo_pendiente, 2)), 'url' => $n->pedido ? route('pedidos.ver', $n->pedido) : route('inicio')])->all();

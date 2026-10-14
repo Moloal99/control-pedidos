@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\AccionBitacora;
+use App\Models\User;
 use App\SharePoint\Sincronizador;
 use App\Support\Rastro;
 use Illuminate\Support\Facades\Artisan;
@@ -33,6 +34,24 @@ Artisan::command('sharepoint:sincronizar {--completa} {--lista=*}', function (Si
 
     return collect($resumen)->contains(fn ($r) => $r['error']) ? 1 : 0;
 })->purpose('Sincroniza las listas de SharePoint con la base local');
+
+/*
+| Lo ejecuta el contenedor en cada arranque: siempre deja los almacenes y,
+| en modo demo con la base vacia, carga los datos de demostracion.
+*/
+Artisan::command('pedidos:preparar', function () {
+    if (User::query()->exists()) {
+        $this->call('db:seed', ['--class' => 'Database\\Seeders\\AlmacenesSeeder', '--force' => true]);
+        $this->info('Base existente: almacenes verificados.');
+
+        return 0;
+    }
+
+    $this->call('db:seed', ['--force' => true]);
+    $this->info('Base inicial preparada (modo '.config('pedidos.modo').').');
+
+    return 0;
+})->purpose('Prepara los datos iniciales del sistema');
 
 Artisan::command('trazabilidad:vencer', function () {
     $this->info(Rastro::vencerInactivas().' sesión(es) cerradas por inactividad.');

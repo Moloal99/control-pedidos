@@ -10,6 +10,7 @@ use App\SharePoint\SharePointNulo;
 use App\SharePoint\TokenMicrosoft;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,5 +36,10 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setLocale('es');
 
         Mail::extend('graph', fn () => new TransporteGraph($this->app->make(TokenMicrosoft::class)));
+
+        // Detras del proxy de Render / Cloudflare: los enlaces y Livewire van por https
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 }
