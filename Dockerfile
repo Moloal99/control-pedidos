@@ -33,6 +33,12 @@ RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/fra
     && php artisan package:discover --ansi \
     && chmod +x docker/iniciar.sh
 
+# Base de demostracion ya armada: al despertar el servicio solo se copia (arranque en segundos)
+RUN touch database/demo.sqlite \
+    && DB_CONNECTION=sqlite DB_DATABASE=/app/database/demo.sqlite PEDIDOS_MODO=demo LOG_CHANNEL=stderr \
+       APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= CACHE_STORE=array QUEUE_CONNECTION=sync MAIL_MAILER=array \
+       sh -c "php artisan migrate --force && php artisan db:seed --force"
+
 ENV PORT=10000 \
     PHP_CLI_SERVER_WORKERS=4 \
     LOG_CHANNEL=stderr

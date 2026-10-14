@@ -18,6 +18,10 @@ fi
 # SQLite: el archivo se crea si no existe
 if [ "$DB_CONNECTION" = "sqlite" ] && [ -n "$DB_DATABASE" ]; then
     mkdir -p "$(dirname "$DB_DATABASE")"
+    # Base vacia + modo demo: se parte de la demostracion armada al compilar
+    if [ ! -s "$DB_DATABASE" ] && [ "$PEDIDOS_MODO" = "demo" ] && [ -s /app/database/demo.sqlite ]; then
+        cp /app/database/demo.sqlite "$DB_DATABASE"
+    fi
     touch "$DB_DATABASE"
 fi
 
